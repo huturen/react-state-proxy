@@ -30,7 +30,7 @@ export default function Hello() {
 ## Motivation
 In other react state libraris(such as `Redux`, `Recoil`, `Mobx`, `Akita`),
 there is a tons of concepts to understand and lots of work to set it up.
-You must follow the specified instructions which is hard to use and less flexible.
+You must follow the specified instructions which are hard to use and less flexible.
 
 Quick look at problems with the other react state libraris:
 
