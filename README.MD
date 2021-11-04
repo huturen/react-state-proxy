@@ -1,5 +1,6 @@
 # react-state-proxy
 
+The most simplified react state management library.
 
 ## Features
 

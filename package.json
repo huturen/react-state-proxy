@@ -1,6 +1,6 @@
 {
   "name": "react-state-proxy",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A new way to simplify your react state management.",
   "main": "dist/index.js",
   "scripts": {
