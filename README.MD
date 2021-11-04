@@ -146,8 +146,9 @@ For a large application, you can separate your state data from your business cod
 // models/num.ts
 import { stateProxy } from 'react-state-proxy';
 
-export default function num() {
-  const state = stateProxy({ num: 0 });
+const stateTarget = { num: 0, };
+export default function modelNum() {
+  const state = stateProxy(stateTarget);
 
   return {
     state,
