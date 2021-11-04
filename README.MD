@@ -37,7 +37,7 @@ Quick look at problems with the other react state libraris:
 
 * Steep learning curve
 * Too much boilerplate code
-* Too much concepts
+* Too many concepts
 * Hard to set up
 * Not intuitive
 * Difficult to achieve code-splitting
