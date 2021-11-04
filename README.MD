@@ -188,7 +188,7 @@ export default function Hello() {
 
 Create a responsive state object for `Function Component`.
 
-### stateProxyForClassComponent<State extends object>(stateTarget: State)
+### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State)
 
 Create a responsive state object for `Class Component`.
 
