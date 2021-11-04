@@ -1,5 +1,4 @@
-// react-state-proxy
-import React, { useState } from 'react';
+import { Component, useEffect, useState } from 'react';
 
 type Target = Record<string, any> | any[];
 
@@ -7,22 +6,26 @@ function isObjOrArr(obj: any) {
   return {}.toString.call(obj) === '[object Object]' || {}.toString.call(obj) === '[object Array]';
 }
 
-let saveStateTimer: NodeJS.Timeout;
-export function stateWrapper(stateData: any): any {
-  if (!isObjOrArr(stateData)) {
-    throw new Error('react-state-proxy[stateWrapper]: The [stateData] must be an object or an array.');
+export function stateProxy<State extends object>(stateTarget: State): State {
+  if (!isObjOrArr(stateTarget)) {
+    throw new Error('react-state-proxy[stateProxy]: The [stateTarget] must be an object.');
   }
 
-  // Instead of using Symbol.toStringTag, we use ____proxy____ property to check Proxy instance.
-  const wrap = (obj: any) => (isObjOrArr(obj) && !obj.____proxy____ ? new Proxy(obj, handler) : obj);
+  let timer: NodeJS.Timeout;
+  useEffect(() => {
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Instead of using Symbol.toStringTag, we use ____rsp_proxy____ property to check Proxy instance.
+  const wrap = (obj: any) => (isObjOrArr(obj) && !obj.____rsp_proxy____ ? new Proxy(obj, handler) : obj);
   const save = () => {
-    clearTimeout(saveStateTimer);
-    saveStateTimer = setTimeout(() => setState(new Proxy(stateData, handler)));
+    clearTimeout(timer);
+    timer = setTimeout(() => setState(new Proxy(stateTarget, handler)));
   };
 
   const handler = {
     get(target: Target, key: string, receiver: any): any {
-      return key === '____proxy____' ? true : wrap(Reflect.get(target, key, receiver));
+      return key === '____rsp_proxy____' ? true : wrap(Reflect.get(target, key, receiver));
     },
     set(target: Target, key: string, value: any, receiver: any) {
       const res = Reflect.set(target, key, wrap(value), receiver);
@@ -36,32 +39,36 @@ export function stateWrapper(stateData: any): any {
     },
   };
 
-  const [state, setState] = useState<any>(new Proxy(stateData, handler));
-  return state;
+  const [state, setState] = useState<any>(new Proxy(stateTarget, handler));
+  return state as State;
 }
 
-let saveStateTimer4class: NodeJS.Timeout;
-export function stateWrapperForClassComponent(component: React.Component, stateData: any): any {
-  if (!isObjOrArr(stateData)) {
-    throw new Error('react-state-proxy[stateWrapper]: The [stateData] must be an object or an array.');
+export function stateProxyForClassComponent<State extends object>(component: Component, stateTarget: State): State {
+  if (!isObjOrArr(stateTarget)) {
+    throw new Error('react-state-proxy[stateProxyForClassComponent]: The [stateTarget] must be an object.');
   }
 
-  // Instead of using Symbol.toStringTag, we use ____proxy____ property to check Proxy instance.
-  const wrap = (obj: any) => (isObjOrArr(obj) && !obj.____proxy____ ? new Proxy(obj, handler) : obj);
+  let timer: NodeJS.Timeout;
+  const original = component.componentWillUnmount?.bind(component);
+  component.componentWillUnmount = function () {
+    clearTimeout(timer);
+    return original?.();
+  };
+
+  // Instead of using Symbol.toStringTag, we use ____rsp_proxy____ property to check Proxy instance.
+  const wrap = (obj: any) => (isObjOrArr(obj) && !obj.____rsp_proxy____ ? new Proxy(obj, handler) : obj);
   const save = () => {
-    clearTimeout(saveStateTimer4class);
-    saveStateTimer4class = setTimeout(() => {
-      component.setState(new Proxy(stateData, handler));
-      component.state = new Proxy(stateData, handler);
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      component.setState({}); // trigger render
     });
   };
 
   const handler = {
     get(target: Target, key: string, receiver: any): any {
-      return key === '____proxy____' ? true : wrap(Reflect.get(target, key, receiver));
+      return key === '____rsp_proxy____' ? true : wrap(Reflect.get(target, key, receiver));
     },
     set(target: Target, key: string, value: any, receiver: any) {
-      console.log('set:', key, value);
       const res = Reflect.set(target, key, wrap(value), receiver);
       save();
       return res;
@@ -72,10 +79,14 @@ export function stateWrapperForClassComponent(component: React.Component, stateD
       return res;
     },
   };
-  return new Proxy(stateData, handler);
+  return new Proxy(stateTarget, handler) as State;
 }
 
 // alias
-export const stateProxy = stateWrapper;
-export const stateProxyForClassComponent = stateWrapperForClassComponent;
-export const stateProxy4ClassComponent = stateWrapperForClassComponent;
+export const createState = stateProxy;
+
+export const stateProxyForCC = stateProxyForClassComponent;
+export const stateProxy4ClassComponent = stateProxyForClassComponent;
+export const stateProxy4CC = stateProxyForClassComponent;
+export const createState4ClassComponent = stateProxyForClassComponent;
+export const createState4CC = stateProxyForClassComponent;
