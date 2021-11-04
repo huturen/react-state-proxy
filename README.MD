@@ -37,8 +37,8 @@ Quick look at problems with the other react state libraris:
 
 * Steep learning curve
 * Too much boilerplate code
-* Re-structure your project
-* Lacks concurrent mode support
+* Too much concepts
+* Hard to set up
 * Not intuitive
 * Difficult to achieve code-splitting
 
@@ -57,7 +57,6 @@ YARN: `yarn add react-state-proxy`
 
 
 ## Usage
-
 
 ### For function component:
 
