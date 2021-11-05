@@ -146,6 +146,7 @@ For a large application, you can separate your state data from your business cod
 // models/num.ts
 import { stateProxy } from 'react-state-proxy';
 
+// [stateTarget] out of the model function below is required for sharing with other components.
 const stateTarget = { num: 0, };
 export default function modelNum() {
   const state = stateProxy(stateTarget);
@@ -183,15 +184,42 @@ export default function Hello() {
 
 ```
 
+## Batched re-render
+Multiple synchronous state mutations will not result in multiple re-renders. Renders are batched.
+
+```jsx
+import { stateProxy } from 'react-state-proxy';
+
+let times = 0;
+export default function Hello() {
+  const state = stateProxy({
+    name: 'Lucy',
+    age: 18,
+    email: 'lucy@gmail.com',
+  });
+
+  const updateUser = () => {
+    state.name = 'Lily';
+    state.age++;
+    state.email = 'lily@gmail.com';
+  };
+  console.log('times:', ++times);
+
+  // [updateUser] will only trigger only once re-render even though it mutates the state 3 times.
+  return <button onClick={updateUser}>User: {JSON.stringify(state)}</button>;
+}
+```
+
+
 ## API
 
 ### stateProxy<State extends object>(stateTarget: State)
 
-Create a responsive state object for `Function Component`.
+Create a reactive state object for `Function Component`.
 
 ### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State)
 
-Create a responsive state object for `Class Component`.
+Create a reactive state object for `Class Component`.
 
 Alias:
 
