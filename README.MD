@@ -185,7 +185,7 @@ export default function Hello() {
 ```
 
 ## Batched re-render
-Multiple synchronous state mutations will not result in multiple re-renders. Renders are batched.
+Multiple synchronous state mutations will not result in multiple re-renders.
 
 ```jsx
 import { stateProxy } from 'react-state-proxy';
@@ -205,7 +205,7 @@ export default function Hello() {
   };
   console.log('times:', ++times);
 
-  // [updateUser] will only trigger only once re-render even though it mutates the state 3 times.
+  // [updateUser] will trigger only once re-render even though it mutates the state 3 times.
   return <button onClick={updateUser}>User: {JSON.stringify(state)}</button>;
 }
 ```
