@@ -13,6 +13,7 @@
     "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports" : true,
     "declaration": true,
+    "downlevelIteration": true,
     "typeRoots": ["./node_modules/@types"]
   },
   "include": [

@@ -6,21 +6,39 @@ function isObjOrArr(obj: any) {
   return {}.toString.call(obj) === '[object Object]' || {}.toString.call(obj) === '[object Array]';
 }
 
+// All state targets
+const targets: Map<object, Set<Function>> = new Map();
+
 export function stateProxy<State extends object>(stateTarget: State): State {
   if (!isObjOrArr(stateTarget)) {
     throw new Error('react-state-proxy[stateProxy]: The [stateTarget] must be an object.');
   }
+  if (!targets.has(stateTarget)) {
+    targets.set(stateTarget, new Set());
+  }
+  const subscribers: Set<Function> = targets.get(stateTarget)!;
+
+  const [, setState] = useState({});
+  subscribers.add(setState);
 
   let timer: NodeJS.Timeout;
   useEffect(() => {
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      subscribers.clear();
+      targets.delete(stateTarget);
+    };
   }, []);
 
   // Instead of using Symbol.toStringTag, we use ____rsp_proxy____ property to check Proxy instance.
   const wrap = (obj: any) => (isObjOrArr(obj) && !obj.____rsp_proxy____ ? new Proxy(obj, handler) : obj);
   const save = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => setState(new Proxy(stateTarget, handler)));
+    timer = setTimeout(() => {
+      for (const setStateFun of subscribers) {
+        setStateFun({}); // trigger re-render
+      }
+    });
   };
 
   const handler = {
@@ -39,8 +57,7 @@ export function stateProxy<State extends object>(stateTarget: State): State {
     },
   };
 
-  const [state, setState] = useState<any>(new Proxy(stateTarget, handler));
-  return state as State;
+  return new Proxy(stateTarget, handler) as State;
 }
 
 export function stateProxyForClassComponent<State extends object>(component: Component, stateTarget: State): State {
@@ -48,10 +65,18 @@ export function stateProxyForClassComponent<State extends object>(component: Com
     throw new Error('react-state-proxy[stateProxyForClassComponent]: The [stateTarget] must be an object.');
   }
 
+  if (!targets.has(stateTarget)) {
+    targets.set(stateTarget, new Set());
+  }
+  const subscribers: Set<Function> = targets.get(stateTarget)!;
+  subscribers.add(component.setState.bind(component));
+
   let timer: NodeJS.Timeout;
   const original = component.componentWillUnmount?.bind(component);
   component.componentWillUnmount = function () {
     clearTimeout(timer);
+    subscribers.clear();
+    targets.delete(stateTarget);
     return original?.();
   };
 
@@ -60,7 +85,9 @@ export function stateProxyForClassComponent<State extends object>(component: Com
   const save = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      component.setState({}); // trigger render
+      for (const setStateFun of subscribers) {
+        setStateFun({}); // trigger re-render
+      }
     });
   };
 
