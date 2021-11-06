@@ -49,9 +49,8 @@ Quick look at problems with the other react state libraris:
 * Not intuitive
 * Difficult to achieve code-splitting
 
-In some cases, I think, we just need a simple react state management without complex concepts
-and complicated API calls to set up. The state management should be as simple as managing normal
-javascript variables.
+In some cases, I think, we just need a simple react state management that should be as simple as managing normal
+javascript variables, without complex concepts and complicated API calls to set up. Less is more.
 
 
 ## Installation
