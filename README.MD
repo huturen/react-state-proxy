@@ -153,7 +153,8 @@ export default class Welcome extends React.Component {
 import { stateProxy } from 'react-state-proxy';
 
 // [stateTarget] is needed to be out of the model function below.
-// If you want to share states between multiple components, [stateTarget] must be pointed to the same object.
+// If you want to share states between multiple components,
+// [stateTarget] must be pointed to the same object.
 const stateTarget = { num: 0, };
 export default function modelNum() {
   const state = stateProxy(stateTarget);
