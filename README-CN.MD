@@ -2,26 +2,26 @@
 ![License](https://img.shields.io/npm/l/react-state-proxy)
 
 
-**English** | [中文](https://github.com/huturen/react-state-proxy/blob/main/README-CN.MD)
+**中文** | [English](https://github.com/huturen/react-state-proxy/blob/main/README.MD)
+
 
 # react-state-proxy
 
-The most simplified react state management library.
+极简react状态管理。
 
-## Features
+## 特性
 
-- Extremely easy to use
-- Just one API to set it up
-- Support for `Function Component` and `Class Component`
-- Friendly for beginners
-- Strong scalability for a large application
-- Batched re-render
+- 极容易使用
+- 只需一个API调用
+- 支持函数及类组件
+- 对新手友好
+- 针对大型应用有极强的可扩展性
+- 批量重渲染
 
 
 
-## Introduction
-React State Proxy is a react state management library that is extremely easy to use.
-It supplys a new way to simplify your react state management with just one function to set up.
+## 简介
+`React State Proxy`是一个react状态管理库。极易使用。其提供了一个新的方式来简化你的状态管理。
 
 
 ```jsx
@@ -35,26 +35,25 @@ export default function Hello() {
 ```
 
 
-## Motivation
-In other react state libraris(such as `Redux`, `Recoil`, `Mobx`, `Akita`),
-there is a tons of concepts to understand and lots of work to set it up.
-You must follow the specified instructions which are hard to use and less flexible.
+## 写此库的动机
+目前业界的一些其它状态管理库（如：`Redux`, `Recoil`, `Mobx`, `Akita`），设计过于雕琢，
+成堆的概念，设置复杂，使用起来极其不方便，管理一个简单的状态，往往要书写很多的代码，不灵活。
 
-Quick look at problems with the other react state libraris:
+目前现存的其它状态管理库的一些问题：
 
-* Steep learning curve
-* Too much boilerplate code
-* Too many concepts
-* Hard to set up
-* Not intuitive
-* Difficult to achieve code-splitting
+* 陡峭的学习曲线
+* 太多的样板、套路代码
+* 过于雕琢、概念成堆
+* 设置复杂
+* 理解起来非常不直观
+* 难于实现代码分割
 
-In some cases, I think, we just need a simple react state management without complex concepts
-and complicated API calls to set up. The state management should be as simple as managing normal
-javascript variables.
+从在大多数案例来看，我认为，我们只需要一个简单的状态管理库，不需要过多复杂的概念及难以处理的API调用。
+
+**状态管理应该像管理普通javascript对象那样简单，那样自然**。正所谓，重剑无锋大巧不工。
 
 
-## Installation
+## 安装
 
 
 NPM: `npm install react-state-proxy`
@@ -63,11 +62,11 @@ YARN: `yarn add react-state-proxy`
 
 
 
-## Usage
+## 使用
 
-### For function component:
+### 针对函数组件:
 
-You can use states just like normal javascript objects.
+可以像普通javascript对象那样，来管理你的状态。
 
 ```jsx
 import { stateProxy } from 'react-state-proxy';
@@ -106,9 +105,9 @@ export default function Hello() {
 }
 ```
 
-### For class component:
+### 针对类组件:
 
-You can use both native `state` and stateProxy's state.
+你可以同时使用类组件提供的本地`state`及stateProxy返回的状态对象，两者不冲突。
 
 ```jsx
 import { stateProxy4CC } from 'react-state-proxy';
@@ -133,10 +132,10 @@ export default class Welcome extends React.Component {
 
 ```
 
-*Note:* Don't use stateProxy's state as native `state`. It may conflict with native `setState` method.
+*注意:* 不用使用stateProxy的状态对象来替换类组件中的原生`state`对象， 它会和类组件中的原生`setState`方法冲突。
 ```jsx
 export default class Welcome extends React.Component {
-  // DO NOT DO THIS:
+  // 不要像下面这样使用:
   state = stateProxy4CC(this, {
     num: 0,
   });
@@ -145,16 +144,16 @@ export default class Welcome extends React.Component {
 }
 ```
 
-## Advanced Usage
+## 高级使用方式
 
-**code-splitting**: For a large application, you can separate your state data from your business codes.
+**代码分离**: 针对大型应用而言，你可能需要将你的状态数据和你的业务代码分离。
 
 ```tsx
 // models/num.ts
 import { stateProxy } from 'react-state-proxy';
 
-// [stateTarget] is needed to be out of the model function below.
-// If you want to share states between multiple components, [stateTarget] must be pointed to the same object.
+// 注意：[stateTarget] 需要放置在 modelNum 方法外面。
+// 如果你想在多个组件中共享同一个状态， [stateTarget]需要指向同一个对象。
 const stateTarget = { num: 0, };
 export default function modelNum() {
   const state = stateProxy(stateTarget);
@@ -189,12 +188,14 @@ export default function Hello() {
     </div>
   );
 }
+
 ```
 
-**Async state**: You can change a state with the async/await way.
+
+**异步状态**: 支持在异步方法中变更状态。
 
 ```tsx
-// Way 1:
+// 方式1:
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
@@ -210,7 +211,7 @@ export default function AsyncComponent() {
   return <button onClick={() => state.getApi()}>{state.status}</button>;
 }
 
-// Way 2:
+// 方式2:
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
@@ -227,8 +228,9 @@ export default function AsyncComponent() {
 }
 ```
 
-## Batched re-render
-Multiple synchronous state mutations will not result in multiple re-renders.
+
+## 批量重渲染
+多个同步的状态变更不会引起多次重新渲染。
 
 ```jsx
 import { stateProxy } from 'react-state-proxy';
@@ -248,7 +250,7 @@ export default function Hello() {
   };
   console.log('times:', ++times);
 
-  // [updateUser] will trigger only once re-render even though it mutates the state 3 times.
+  // 在 [updateUser]方法中，尽管状态改变了3次，但只会触发一次重渲染。
   return <button onClick={updateUser}>User: {JSON.stringify(state)}</button>;
 }
 ```
@@ -258,21 +260,19 @@ export default function Hello() {
 
 ### stateProxy<State extends object>(stateTarget: State)
 
-Create a reactive state object for `Function Component`.
-It must be used within a function component or it's children.
+针对函数组件，创建一个响应式的状态对象。注意：这个方法只能在函数组件或其子方法中调用。
 
 ### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State)
 
-Create a reactive state object for `Class Component`.
-It must be used within a class component or it's children.
+针对类组件，创建一个响应式的状态对象。注意：这个方法只能在类组件或其子方法中调用，创建的对象不能替换原生的`state`对象。
 
-Alias:
+别名:
 
 * stateProxyForCC
 * stateProxy4ClassComponent
 * stateProxy4CC
 
-*Note:* `stateProxy` can not be used in a class component and vice versa for `stateProxyForClassComponent`.
+*注意:* `stateProxy` 不能用在类组件中，同样的，`stateProxyForClassComponent`也不能用于函数组件中。
 
 
 

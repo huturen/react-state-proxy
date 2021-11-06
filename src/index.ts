@@ -6,27 +6,27 @@ function isObjOrArr(obj: any) {
   return {}.toString.call(obj) === '[object Object]' || {}.toString.call(obj) === '[object Array]';
 }
 
-// All state targets
-const targets: Map<object, Set<Function>> = new Map();
+function isObj(obj: any) {
+  return {}.toString.call(obj) === '[object Object]';
+}
+
+const subscribers: Map<Function, object> = new Map();
 
 export function stateProxy<State extends object>(stateTarget: State): State {
-  if (!isObjOrArr(stateTarget)) {
+  if (!isObj(stateTarget)) {
     throw new Error('react-state-proxy[stateProxy]: The [stateTarget] must be an object.');
   }
-  if (!targets.has(stateTarget)) {
-    targets.set(stateTarget, new Set());
-  }
-  const subscribers: Set<Function> = targets.get(stateTarget)!;
-
   const [, setState] = useState({});
-  subscribers.add(setState);
+  if (!subscribers.has(setState)) {
+    subscribers.set(setState, stateTarget); // add subscriber & set a cache
+  }
+  const stateData = subscribers.get(setState);
 
   let timer: NodeJS.Timeout;
   useEffect(() => {
     return () => {
       clearTimeout(timer);
-      subscribers.clear();
-      targets.delete(stateTarget);
+      subscribers.delete(setState);
     };
   }, []);
 
@@ -35,8 +35,11 @@ export function stateProxy<State extends object>(stateTarget: State): State {
   const save = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      for (const setStateFun of subscribers) {
-        setStateFun({}); // trigger re-render
+      for (const [setStateFun, cachedStateTarget] of subscribers) {
+        // trigger re-render, only for the same state target
+        if (stateData === cachedStateTarget) {
+          setStateFun({});
+        }
       }
     });
   };
@@ -57,26 +60,26 @@ export function stateProxy<State extends object>(stateTarget: State): State {
     },
   };
 
-  return new Proxy(stateTarget, handler) as State;
+  return new Proxy(stateData as State, handler) as State;
 }
 
 export function stateProxyForClassComponent<State extends object>(component: Component, stateTarget: State): State {
-  if (!isObjOrArr(stateTarget)) {
+  if (!isObj(stateTarget)) {
     throw new Error('react-state-proxy[stateProxyForClassComponent]: The [stateTarget] must be an object.');
   }
 
-  if (!targets.has(stateTarget)) {
-    targets.set(stateTarget, new Set());
+  // bind is required here, otherwise setState will always point to the same object even if different components
+  const setState = component.setState.bind(component);
+  if (!subscribers.has(setState)) {
+    subscribers.set(setState, stateTarget);
   }
-  const subscribers: Set<Function> = targets.get(stateTarget)!;
-  subscribers.add(component.setState.bind(component));
+  const stateData = subscribers.get(setState);
 
   let timer: NodeJS.Timeout;
   const original = component.componentWillUnmount?.bind(component);
   component.componentWillUnmount = function () {
     clearTimeout(timer);
-    subscribers.clear();
-    targets.delete(stateTarget);
+    subscribers.delete(setState);
     return original?.();
   };
 
@@ -85,8 +88,11 @@ export function stateProxyForClassComponent<State extends object>(component: Com
   const save = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      for (const setStateFun of subscribers) {
-        setStateFun({}); // trigger re-render
+      for (const [setStateFun, cachedStateTarget] of subscribers) {
+        // trigger re-render, only for the same state target
+        if (stateData === cachedStateTarget) {
+          setStateFun({});
+        }
       }
     });
   };
@@ -106,14 +112,10 @@ export function stateProxyForClassComponent<State extends object>(component: Com
       return res;
     },
   };
-  return new Proxy(stateTarget, handler) as State;
+  return new Proxy(stateData!, handler) as State;
 }
 
 // alias
-export const createState = stateProxy;
-
 export const stateProxyForCC = stateProxyForClassComponent;
 export const stateProxy4ClassComponent = stateProxyForClassComponent;
 export const stateProxy4CC = stateProxyForClassComponent;
-export const createState4ClassComponent = stateProxyForClassComponent;
-export const createState4CC = stateProxyForClassComponent;
