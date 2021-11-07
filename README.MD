@@ -132,7 +132,10 @@ export default class Welcome extends React.Component {
 
 ```
 
-*Note:* Don't use stateProxy's state as native `state`. It may conflict with native `setState` method.
+*Note:* Don't use stateProxy's state as native `state`.
+It may conflict with native `setState` method in a class component.
+
+
 ```jsx
 export default class Welcome extends React.Component {
   // DO NOT DO THIS:
@@ -195,6 +198,21 @@ export default function Hello() {
 
 ```tsx
 // Way 1:
+import { stateProxy, asyncState } from 'react-state-proxy';
+
+export default function AsyncComponent() {
+  const state = stateProxy({
+    status: asyncState(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return 'done';
+    }, 'loading...'),
+  });
+
+  // the text of the button below will be changed from 'loading...' to 'done' after 1 second.
+  return <button>{state.status.value}</button>;
+}
+
+// Way 2:
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
@@ -208,22 +226,6 @@ export default function AsyncComponent() {
     },
   });
   return <button onClick={() => state.getApi()}>{state.status}</button>;
-}
-
-// Way 2:
-import { stateProxy } from 'react-state-proxy';
-
-export default function AsyncComponent() {
-  const state = stateProxy({
-    status: 'pending',
-  });
-
-  const getApi = async () => {
-    state.status = 'loading';
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    state.status = 'loaded';
-  };
-  return <button onClick={getApi}>{state.status}</button>;
 }
 ```
 
@@ -273,6 +275,23 @@ Alias:
 * stateProxy4CC
 
 *Note:* `stateProxy` can not be used in a class component and vice versa for `stateProxyForClassComponent`.
+
+### asyncState(asyncFunction: Function, initialValue: any = '', fallbackValue?: any)
+
+Return a dynamic asynchronous state like below.
+
+```ts
+type AsyncState = {
+  value: any; // The dynamic state value.
+  resolved: boolean; // It'll be changed to 'true' after resolving of asyncFunction
+  rejected: boolean; // It'll be changed to 'true' after rejecting of asyncFunction
+  valueOf: Function;
+};
+```
+
+- **asyncFunction**: The asynchronous function used to get the dynamic state.
+- **initialValue**: Initial state value before calling *asyncFunction*.
+- **fallbackValue**: Fallback state value when an exception occurs.
 
 
 

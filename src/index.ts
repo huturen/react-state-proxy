@@ -10,6 +10,44 @@ function isObj(obj: any) {
   return {}.toString.call(obj) === '[object Object]';
 }
 
+type AsyncState = {
+  value: any; // The dynamic state value.
+  resolved: boolean; // It'll be changed to 'true' after resolving of asyncFunction
+  rejected: boolean; // It'll be changed to 'true' after rejecting of asyncFunction
+  valueOf: Function;
+  asyncStateSymbol?: Symbol;
+  getAsyncState?: Function;
+};
+
+const asyncStateSymbol = Symbol('asyncState');
+export function asyncState(asyncFunction: Function, initialValue: any = '', fallbackValue?: any) {
+  const getAsyncState = async () => {
+    try {
+      const result = await asyncFunction();
+      res.value = result;
+      res.resolved = true;
+    } catch (err: any) {
+      res.rejected = true;
+      if (fallbackValue === undefined) {
+        throw err;
+      } else {
+        res.value = fallbackValue;
+      }
+    }
+  };
+  const res: AsyncState = {
+    value: initialValue,
+    resolved: false,
+    rejected: false,
+    valueOf() {
+      return res.value;
+    },
+    asyncStateSymbol,
+    getAsyncState,
+  };
+  return res;
+}
+
 const subscribers: Map<Function, object> = new Map();
 
 export function stateProxy<State extends object>(stateTarget: State): State {
@@ -20,7 +58,7 @@ export function stateProxy<State extends object>(stateTarget: State): State {
   if (!subscribers.has(setState)) {
     subscribers.set(setState, stateTarget); // add subscriber & set a cache
   }
-  const stateData = subscribers.get(setState);
+  const stateData: Record<string, any> = subscribers.get(setState)!;
 
   let timer: NodeJS.Timeout;
   useEffect(() => {
@@ -60,7 +98,21 @@ export function stateProxy<State extends object>(stateTarget: State): State {
     },
   };
 
+  initializeAsyncStates(stateData, save);
   return new Proxy(stateData as State, handler) as State;
+}
+
+function initializeAsyncStates(stateData: Record<string, any>, save: Function) {
+  for (let key in stateData) {
+    const item = stateData[key];
+    if (isObj(item) && item.asyncStateSymbol === asyncStateSymbol) {
+      item.getAsyncState().finally(() => {
+        delete item.asyncStateSymbol;
+        delete item.getAsyncState;
+        save();
+      });
+    }
+  }
 }
 
 export function stateProxyForClassComponent<State extends object>(component: Component, stateTarget: State): State {
@@ -73,7 +125,7 @@ export function stateProxyForClassComponent<State extends object>(component: Com
   if (!subscribers.has(setState)) {
     subscribers.set(setState, stateTarget);
   }
-  const stateData = subscribers.get(setState);
+  const stateData: Record<string, any> = subscribers.get(setState)!;
 
   let timer: NodeJS.Timeout;
   const original = component.componentWillUnmount?.bind(component);
@@ -112,6 +164,8 @@ export function stateProxyForClassComponent<State extends object>(component: Com
       return res;
     },
   };
+
+  initializeAsyncStates(stateData, save);
   return new Proxy(stateData!, handler) as State;
 }
 

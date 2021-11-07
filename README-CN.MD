@@ -195,7 +195,22 @@ export default function Hello() {
 **异步状态**: 支持在异步方法中变更状态。
 
 ```tsx
-// 方式1:
+// 方式 1:
+import { stateProxy, asyncState } from 'react-state-proxy';
+
+export default function AsyncComponent() {
+  const state = stateProxy({
+    status: asyncState(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return 'done';
+    }, 'loading...'),
+  });
+
+  // 1秒后，下面按钮的文本将从 'loadinging...' 变成 'done'。
+  return <button>{state.status.value}</button>;
+}
+
+// 方式 2:
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
@@ -209,22 +224,6 @@ export default function AsyncComponent() {
     },
   });
   return <button onClick={() => state.getApi()}>{state.status}</button>;
-}
-
-// 方式2:
-import { stateProxy } from 'react-state-proxy';
-
-export default function AsyncComponent() {
-  const state = stateProxy({
-    status: 'pending',
-  });
-
-  const getApi = async () => {
-    state.status = 'loading';
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    state.status = 'loaded';
-  };
-  return <button onClick={getApi}>{state.status}</button>;
 }
 ```
 
@@ -260,11 +259,11 @@ export default function Hello() {
 
 ### stateProxy<State extends object>(stateTarget: State)
 
-针对函数组件，创建一个响应式的状态对象。注意：这个方法只能在函数组件或其子方法中调用。
+针对函数组件，创建一个响应式的状态对象, 这个方法只能在函数组件或其子方法中调用。
 
 ### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State)
 
-针对类组件，创建一个响应式的状态对象。注意：这个方法只能在类组件或其子方法中调用，创建的对象不能替换原生的`state`对象。
+针对类组件，创建一个响应式的状态对象, 这个方法只能在类组件或其子方法中调用，创建的对象不能替换原生的`state`对象。
 
 别名:
 
@@ -273,6 +272,24 @@ export default function Hello() {
 * stateProxy4CC
 
 *注意:* `stateProxy` 不能用在类组件中，同样的，`stateProxyForClassComponent`也不能用于函数组件中。
+
+
+### asyncState(asyncFunction: Function, initialValue: any = '', fallbackValue?: any)
+
+返回一个异步状态，其数据结构如下所示：
+
+```ts
+type AsyncState = {
+  value: any; // 动态状态值
+  resolved: boolean; // 如果asyncFunction执行成功，这个值将被设置成 true
+  rejected: boolean; // 如果asyncFunction执行失败，这个值将被设置成 true
+  valueOf: Function;
+};
+```
+
+- **asyncFunction**: 异步函数，用于获取动态状态。
+- **initialValue**: 调用 *asyncFunction* 前的初始状态值。
+- **fallbackValue**: 执行异常时的状态值。
 
 
 
