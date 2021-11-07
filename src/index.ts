@@ -11,9 +11,9 @@ function isObj(obj: any) {
 }
 
 type AsyncState = {
-  value: any; // The dynamic state value.
-  resolved: boolean; // It'll be changed to 'true' after resolving of asyncFunction
-  rejected: boolean; // It'll be changed to 'true' after rejecting of asyncFunction
+  value: any; // The dynamic state value. To be one of initialValue, resolvedValue or fallbackValue.
+  resolved: any; // It'll be updated after resolving of asyncFunction
+  rejected: any; // It'll be updated after rejecting of asyncFunction
   valueOf: Function;
   asyncStateSymbol?: Symbol;
   getAsyncState?: Function;
@@ -25,9 +25,9 @@ export function asyncState(asyncFunction: Function, initialValue: any = '', fall
     try {
       const result = await asyncFunction();
       res.value = result;
-      res.resolved = true;
+      res.resolved = result;
     } catch (err: any) {
-      res.rejected = true;
+      res.rejected = err;
       if (fallbackValue === undefined) {
         throw err;
       } else {
