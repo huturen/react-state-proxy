@@ -106,11 +106,9 @@ function initializeAsyncStates(stateData: Record<string, any>, save: Function) {
   for (let key in stateData) {
     const item = stateData[key];
     if (isObj(item) && item.asyncStateSymbol === asyncStateSymbol) {
-      item.getAsyncState().finally(() => {
-        delete item.asyncStateSymbol;
-        delete item.getAsyncState;
-        save();
-      });
+      delete item.asyncStateSymbol;
+      item.getAsyncState().finally(() => save());
+      delete item.getAsyncState;
     }
   }
 }
