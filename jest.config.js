@@ -1,12 +1,14 @@
 module.exports = {
   verbose: true,
   moduleFileExtensions: [
-    'js', 'ts'
+    'js', 'ts', 'tsx'
   ],
   transform : {
     "^.+\\.[t|j]sx?$": "babel-jest",  // do not change this line
     '^.+\\.ts?$': 'ts-jest',
   },
+  setupFilesAfterEnv: ["@testing-library/jest-dom"],
+
   transformIgnorePatterns: [
     // https://stackoverflow.com/questions/55794280/jest-fails-with-unexpected-token-on-import-statement
     // avoid "Cannot use import statement outside a module" error for ky
@@ -15,7 +17,7 @@ module.exports = {
   snapshotSerializers: [
   ],
   testMatch: [
-    '**/test/**/*.(test).(js|ts)',
+    '**/test/**/*.(test).(js|ts|tsx)',
   ],
   testPathIgnorePatterns: [
   ],

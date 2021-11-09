@@ -1,4 +1,5 @@
 [![Latest version](https://img.shields.io/npm/v/react-state-proxy.svg?style=flat)](https://www.npmjs.com/package/react-state-proxy)
+[![Coverage Status](https://coveralls.io/repos/github/huturen/react-state-proxy/badge.svg?branch=main)](https://coveralls.io/github/huturen/react-state-proxy?branch=main)
 ![License](https://img.shields.io/npm/l/react-state-proxy)
 
 

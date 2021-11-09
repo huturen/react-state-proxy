@@ -1,4 +1,5 @@
-import { Component, useEffect, useState } from 'react';
+import { Component, useLayoutEffect, useState } from 'react';
+// import { Component, useEffect, useState } from 'react';
 
 type Target = Record<string, any> | any[];
 
@@ -20,7 +21,7 @@ type AsyncState = {
 };
 
 const asyncStateSymbol = Symbol('asyncState');
-export function asyncState(asyncFunction: Function, initialValue: any = '', fallbackValue?: any) {
+export function asyncState(asyncFunction: Function, initialValue: any = null, fallbackValue: any = null) {
   const getAsyncState = async () => {
     try {
       const result = await asyncFunction();
@@ -28,11 +29,7 @@ export function asyncState(asyncFunction: Function, initialValue: any = '', fall
       res.resolved = result;
     } catch (err: any) {
       res.rejected = err;
-      if (fallbackValue === undefined) {
-        throw err;
-      } else {
-        res.value = fallbackValue;
-      }
+      res.value = fallbackValue;
     }
   };
   const res: AsyncState = {
@@ -61,7 +58,7 @@ export function stateProxy<State extends object>(stateTarget: State): State {
   const stateData: Record<string, any> = subscribers.get(setState)!;
 
   let timer: NodeJS.Timeout;
-  useEffect(() => {
+  useLayoutEffect(() => {
     return () => {
       clearTimeout(timer);
       subscribers.delete(setState);
@@ -167,7 +164,5 @@ export function stateProxyForClassComponent<State extends object>(component: Com
   return new Proxy(stateData!, handler) as State;
 }
 
-// alias
-export const stateProxyForCC = stateProxyForClassComponent;
 export const stateProxy4ClassComponent = stateProxyForClassComponent;
 export const stateProxy4CC = stateProxyForClassComponent;
