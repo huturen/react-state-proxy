@@ -196,16 +196,17 @@ export default function Hello() {
 }
 ```
 
-**Async state**: You can change a state with the async/await way.
+**Async state**:
 
 ```tsx
-// Way 1:
+// Way 1: `react-state-proxy` supplys an optional function to manage your async states.
 import { stateProxy, asyncState } from 'react-state-proxy';
 
 export default function AsyncComponent() {
   const state = stateProxy({
     status: asyncState(async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
       return 'done';
     }, 'loading...'),
   });
@@ -214,7 +215,7 @@ export default function AsyncComponent() {
   return <button>{state.status.value}</button>;
 }
 
-// Way 2:
+// Way 2: Also, your can use your own function to manage it.
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {

@@ -197,22 +197,23 @@ export default function Hello() {
 **异步状态**: 支持在异步方法中变更状态。
 
 ```tsx
-// 方式 1:
+// 方式 1: `react-state-proxy` 提供了一个可选的方法来管理的异步状态。
 import { stateProxy, asyncState } from 'react-state-proxy';
 
 export default function AsyncComponent() {
   const state = stateProxy({
     status: asyncState(async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
       return 'done';
     }, 'loading...'),
   });
 
-  // 1秒后，下面按钮的文本将从 'loadinging...' 变成 'done'。
+  // 1秒后，下面按钮的文本将从 'loading...' 变成 'done'。
   return <button>{state.status.value}</button>;
 }
 
-// 方式 2:
+// 方式 2: 当然，你也可以用自己定义的方法来管理它。
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
