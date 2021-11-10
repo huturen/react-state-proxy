@@ -286,8 +286,8 @@ export default function Hello() {
 ```ts
 type AsyncState = {
   value: any; // 动态状态值, 这个值将会是 initialValue、resolvedValue 或 fallbackValue 中的一个
-  resolved: any; // 如果asyncFunction执行成功，这个值将被设置成 asyncFunction 返回的值
-  rejected: any; // 如果asyncFunction执行失败，这个值将被设置成 抛出的异常错误信息
+  resolved: boolean; // 如果asyncFunction执行成功，这个值将被设置成 true
+  rejected: boolean | Error; // 如果asyncFunction执行失败，这个值将被设置成 抛出的异常错误信息
   valueOf: Function;
 };
 ```
