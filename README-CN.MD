@@ -148,7 +148,9 @@ export default class Welcome extends React.Component {
 
 ## 高级使用方式
 
-**代码分离**: 针对大型应用而言，你可能需要将你的状态数据和你的业务代码分离。
+**代码分离**:
+
+针对大型应用而言，你可能需要将你的状态数据和你的业务代码分离。
 
 ```tsx
 // models/num.ts

@@ -151,7 +151,9 @@ export default class Welcome extends React.Component {
 
 ## Advanced Usage
 
-**code-splitting**: For a large application, you can separate your state data from your business codes.
+**code-splitting**:
+
+For a large application, you can separate your state data from your business codes.
 
 ```tsx
 // models/num.ts
