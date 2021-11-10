@@ -199,7 +199,7 @@ export default function Hello() {
 **异步状态**: 支持在异步方法中变更状态。
 
 ```tsx
-// 方式 1: `react-state-proxy` 提供了一个可选的方法来管理的异步状态。
+// 方式 1: `react-state-proxy` 提供了一个可选的方法来管理你的异步状态。
 import { stateProxy, asyncState } from 'react-state-proxy';
 
 export default function AsyncComponent() {
