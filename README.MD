@@ -217,20 +217,21 @@ export default function AsyncComponent() {
   return <button>{state.status.value}</button>;
 }
 
-// Way 2: Also, your can use your own function to manage it.
+// Way 2: Use __init__ method
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
   const state = stateProxy({
     status: 'pending',
 
-    async getApi() {
+    // __init__ will be called automatically when stateProxy initializes a stateTarget.
+    async __init__() {
       this.status = 'loading';
       await new Promise((resolve) => setTimeout(resolve, 1000));
       this.status = 'loaded';
     },
   });
-  return <button onClick={() => state.getApi()}>{state.status}</button>;
+  return <button>{state.status}</button>;
 }
 ```
 

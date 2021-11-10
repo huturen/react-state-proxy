@@ -107,6 +107,14 @@ function initializeAsyncStates(stateData: Record<string, any>, save: Function) {
       item.getAsyncState().finally(() => save());
       delete item.getAsyncState;
     }
+
+    if (key === '__init__' && typeof item === 'function') {
+      delete stateData[key];
+      (async () => {
+        await item.call(stateData);
+        save();
+      })();
+    }
   }
 }
 
