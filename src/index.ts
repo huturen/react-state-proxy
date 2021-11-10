@@ -164,5 +164,6 @@ export function stateProxyForClassComponent<State extends object>(component: Com
   return new Proxy(stateData!, handler) as State;
 }
 
+export const stateProxyForCC = stateProxyForClassComponent;
 export const stateProxy4ClassComponent = stateProxyForClassComponent;
 export const stateProxy4CC = stateProxyForClassComponent;
