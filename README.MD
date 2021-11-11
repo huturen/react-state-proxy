@@ -191,7 +191,7 @@ export default function Hello() {
 }
 ```
 
-In another way, just use `stateProxy` directly.
+Or in another way, just use `stateProxy` directly.
 
 ```tsx
 // models/num.ts

@@ -187,7 +187,7 @@ export default function Hello() {
 }
 ```
 
-另外一种使用方式， 直接使用 `stateProxy` 代理目标状态对象。
+或者使用另外一种方式， 直接用 `stateProxy` 代理目标状态对象。
 
 ```tsx
 // models/num.ts
