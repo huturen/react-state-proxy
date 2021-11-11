@@ -293,9 +293,9 @@ type AsyncState = {
 };
 ```
 
-- **asyncFunction**: 异步函数，用于获取动态状态。
-- **initialValue**: 调用 *asyncFunction* 前的初始状态值。
-- **fallbackValue**: 执行异常时的状态值。
+- asyncFunction: 异步函数，用于获取动态状态。
+- initialValue: 调用 *asyncFunction* 前的初始状态值。
+- fallbackValue: 执行异常时的状态值。
 
 
 ### async(initialValue: any, asyncFunction: Function, fallbackValue: any = null)

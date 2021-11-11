@@ -296,9 +296,9 @@ type AsyncState = {
 };
 ```
 
-- **asyncFunction**: The asynchronous function used to get the dynamic state.
-- **initialValue**: Initial state value before calling *asyncFunction*.
-- **fallbackValue**: Fallback state value when an exception occurs.
+- asyncFunction: The asynchronous function used to get the dynamic state.
+- initialValue: Initial state value before calling *asyncFunction*.
+- fallbackValue: Fallback state value when an exception occurs.
 
 
 
