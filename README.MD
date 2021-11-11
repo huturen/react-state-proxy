@@ -301,11 +301,12 @@ type AsyncState = {
 - **fallbackValue**: Fallback state value when an exception occurs.
 
 
+
 ### async(initialValue: any, asyncFunction: Function, fallbackValue: any = null)
 
-A shorter alternative version of **asyncState**.
+A shorter alternative version of `asyncState`.
+The same as `asyncState`, but with different parameters.
 
-The same as **asyncState**, but with different parameters.
 
 ## License
 

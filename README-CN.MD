@@ -300,7 +300,7 @@ type AsyncState = {
 
 ### async(initialValue: any, asyncFunction: Function, fallbackValue: any = null)
 
-**asyncState**的另一个更短的可选版本， 表现和**asyncState**一样, 只是参数顺序不一样。
+`asyncState`的另一个更短的可选版本， 表现和`asyncState`一样, 只是参数顺序不一样。
 
 
 ## License
