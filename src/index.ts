@@ -113,11 +113,12 @@ export function stateProxy<State extends object>(stateTarget: State): State {
     },
   };
 
-  initializeAsyncStates(stateData, save);
-  return new Proxy(stateData as State, handler) as State;
+  const proxy = new Proxy(stateData as State, handler) as State
+  initializeStates(stateData, proxy, save);
+  return proxy;
 }
 
-function initializeAsyncStates(stateData: Record<string, any>, save: Function) {
+function initializeStates(stateData: Record<string, any>, proxy: object, save: Function) {
   for (let key in stateData) {
     const item = stateData[key];
     if (isObj(item) && item.asyncStateSymbol === asyncStateSymbol) {
@@ -125,13 +126,16 @@ function initializeAsyncStates(stateData: Record<string, any>, save: Function) {
       item.getAsyncState().finally(() => save());
       delete item.getAsyncState;
     }
-
-    if (key === '__init__' && typeof item === 'function') {
+    else if (key === '__init__' && typeof item === 'function') {
       delete stateData[key];
       (async () => {
         await item.call(stateData);
         save();
       })();
+    }
+    else if (typeof item === 'function') {
+      // bind this and the first parameter
+      stateData[key] = stateData[key].bind(proxy, proxy);
     }
   }
 }
@@ -189,8 +193,9 @@ export function stateProxyForClassComponent<State extends object>(component: Com
     },
   };
 
-  initializeAsyncStates(stateData, save);
-  return new Proxy(stateData!, handler) as State;
+  const proxy = new Proxy(stateData!, handler) as State;
+  initializeStates(stateData, proxy, save);
+  return proxy;
 }
 
 export const stateProxyForCC = stateProxyForClassComponent;
