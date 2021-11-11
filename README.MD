@@ -163,19 +163,17 @@ import { stateProxy } from 'react-state-proxy';
 // [stateTarget] is needed to be out of the model function below.
 // If you want to share states between multiple components,
 // [stateTarget] must be pointed to the same object.
-const stateTarget = { num: 0, };
+const stateTarget = { num: 0 };
 export default function modelNum() {
   const state = stateProxy(stateTarget);
-
   return {
-    state,
     inc() {
       state.num++;
     },
     get num() {
       return state.num;
     },
-    get count() {
+    get sum() {
       return state.num + 10;
     },
   };
@@ -183,21 +181,43 @@ export default function modelNum() {
 
 // components/business.tsx
 import modelNum from '@/models/num';
-
 export default function Hello() {
-  const { num, inc, count } = modelNum();
-  useEffect(() => {
-    const timer = setInterval(() => inc(), 3000);
-    return () => clearInterval(timer);
-  }, []);
-
+  const { num, inc, sum } = modelNum();
   return (
     <div>
-      <button onClick={inc}>{num}</button> + 10 = <span>{count}</span>
+      <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
     </div>
   );
 }
 ```
+
+In another way, just use `stateProxy` directly.
+
+```tsx
+// models/num.ts
+export default {
+  num: 0,
+  inc() {
+    this.num++;
+  },
+  get sum() {
+    return this.num + 10;
+  },
+};
+
+// components/business.tsx
+import { stateProxy } from 'react-state-proxy';
+import modelData from '@/models/num';
+export default function Hello() {
+  const { num, inc, sum } = stateProxy(modelData);
+  return (
+    <div>
+      <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
+    </div>
+  );
+}
+```
+
 
 **Async state**:
 

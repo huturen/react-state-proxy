@@ -159,19 +159,17 @@ import { stateProxy } from 'react-state-proxy';
 
 // 注意：[stateTarget] 需要放置在 modelNum 方法外面。
 // 如果你想在多个组件中共享同一个状态， [stateTarget]需要指向同一个对象。
-const stateTarget = { num: 0, };
+const stateTarget = { num: 0 };
 export default function modelNum() {
   const state = stateProxy(stateTarget);
-
   return {
-    state,
     inc() {
       state.num++;
     },
     get num() {
       return state.num;
     },
-    get count() {
+    get sum() {
       return state.num + 10;
     },
   };
@@ -179,21 +177,41 @@ export default function modelNum() {
 
 // components/business.tsx
 import modelNum from '@/models/num';
-
 export default function Hello() {
-  const { num, inc, count } = modelNum();
-  useEffect(() => {
-    const timer = setInterval(() => inc(), 3000);
-    return () => clearInterval(timer);
-  }, []);
-
+  const { num, inc, sum } = modelNum();
   return (
     <div>
-      <button onClick={inc}>{num}</button> + 10 = <span>{count}</span>
+      <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
     </div>
   );
 }
+```
 
+另外一种使用方式， 直接使用 `stateProxy` 代理目标状态对象。
+
+```tsx
+// models/num.ts
+export default {
+  num: 0,
+  inc() {
+    this.num++;
+  },
+  get sum() {
+    return this.num + 10;
+  },
+};
+
+// components/business.tsx
+import { stateProxy } from 'react-state-proxy';
+import modelData from '@/models/num';
+export default function Hello() {
+  const { num, inc, sum } = stateProxy(modelData);
+  return (
+    <div>
+      <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
+    </div>
+  );
+}
 ```
 
 
