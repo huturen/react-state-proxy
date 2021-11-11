@@ -19,6 +19,7 @@
 - 对新手相当友好
 - 针对大型应用有极强的可扩展性
 - 批量重渲染
+- 支持异步状态
 
 
 
@@ -296,6 +297,10 @@ type AsyncState = {
 - **initialValue**: 调用 *asyncFunction* 前的初始状态值。
 - **fallbackValue**: 执行异常时的状态值。
 
+
+### async(initialValue: any, asyncFunction: Function, fallbackValue: any = null)
+
+**asyncState**的另一个更短的可选版本， 表现和**asyncState**一样, 只是参数顺序不一样。
 
 
 ## License

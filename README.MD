@@ -18,6 +18,7 @@ The most simplified react state management library.
 - Friendly for beginners
 - Strong scalability for a large application
 - Batched re-render
+- Support for asynchronous state
 
 
 
@@ -300,6 +301,11 @@ type AsyncState = {
 - **fallbackValue**: Fallback state value when an exception occurs.
 
 
+### async(initialValue: any, asyncFunction: Function, fallbackValue: any = null)
+
+A shorter alternative version of **asyncState**.
+
+The same as **asyncState**, but with different parameters.
 
 ## License
 

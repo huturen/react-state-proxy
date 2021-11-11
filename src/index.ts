@@ -11,6 +11,17 @@ function isObj(obj: any) {
   return {}.toString.call(obj) === '[object Object]';
 }
 
+function isPrimitive(variable: any) {
+  return (
+    typeof variable === 'number' ||
+    typeof variable === 'string' ||
+    typeof variable === 'boolean' ||
+    typeof variable === 'undefined' ||
+    typeof variable === 'symbol' ||
+    variable === null
+  );
+}
+
 type AsyncState = {
   value: any; // The dynamic state value. To be one of initialValue, resolvedValue or fallbackValue.
   resolved: boolean; // It'll be updated after resolving of asyncFunction
@@ -22,16 +33,6 @@ type AsyncState = {
 
 const asyncStateSymbol = Symbol('asyncState');
 export function asyncState(asyncFunction: Function, initialValue: any = null, fallbackValue: any = null) {
-  const getAsyncState = async () => {
-    try {
-      const result = await asyncFunction();
-      res.value = result;
-      res.resolved = true;
-    } catch (err: any) {
-      res.rejected = err;
-      res.value = fallbackValue;
-    }
-  };
   const res: AsyncState = {
     value: initialValue,
     resolved: false,
@@ -40,9 +41,23 @@ export function asyncState(asyncFunction: Function, initialValue: any = null, fa
       return res.value;
     },
     asyncStateSymbol,
-    getAsyncState,
+    getAsyncState: async () => {
+      try {
+        const result = await asyncFunction();
+        res.value = result;
+        res.resolved = true;
+      } catch (err: any) {
+        res.rejected = err;
+        res.value = fallbackValue;
+      }
+    },
   };
   return res;
+}
+
+// The same as asyncState, but with different parameters
+export function async(initialValue: any, asyncFunction: Function, fallbackValue: any = null) {
+  return asyncState(asyncFunction, initialValue, fallbackValue);
 }
 
 const subscribers: Map<Function, object> = new Map();
@@ -84,8 +99,11 @@ export function stateProxy<State extends object>(stateTarget: State): State {
       return key === '____rsp_proxy____' ? true : wrap(Reflect.get(target, key, receiver));
     },
     set(target: Target, key: string, value: any, receiver: any) {
+      const prev = Reflect.get(target, key, receiver);
       const res = Reflect.set(target, key, wrap(value), receiver);
-      save();
+      if (!isPrimitive(prev) || prev !== value) {
+        save();
+      }
       return res;
     },
     deleteProperty(target: Target, key: string) {
@@ -157,8 +175,11 @@ export function stateProxyForClassComponent<State extends object>(component: Com
       return key === '____rsp_proxy____' ? true : wrap(Reflect.get(target, key, receiver));
     },
     set(target: Target, key: string, value: any, receiver: any) {
+      const prev = Reflect.get(target, key, receiver);
       const res = Reflect.set(target, key, wrap(value), receiver);
-      save();
+      if (!isPrimitive(prev) || prev !== value) {
+        save();
+      }
       return res;
     },
     deleteProperty(target: Target, key: string) {

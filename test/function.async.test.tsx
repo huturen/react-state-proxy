@@ -2,14 +2,14 @@
 // import {render, fireEvent, waitFor, screen} from '@testing-library/react'
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { asyncState, stateProxy } from '../src/index';
+import { async, asyncState, stateProxy } from '../src/index';
 
 function ResolvedState() {
   const state = stateProxy({
-    dynamic: asyncState(async () => {
+    dynamic: async('loading...', async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       return 'done';
-    }, 'loading...'),
+    }),
   });
   return (
     <div>

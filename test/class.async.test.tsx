@@ -2,14 +2,14 @@
 // import {render, fireEvent, waitFor, screen} from '@testing-library/react'
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { asyncState, stateProxy4CC } from '../src/index';
+import { async, asyncState, stateProxy4CC } from '../src/index';
 
 class ResolvedState extends React.Component {
   statex = stateProxy4CC(this, {
-    dynamic: asyncState(async () => {
+    dynamic: async('loading...', async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       return 'done';
-    }, 'loading...'),
+    }),
   });
 
   render() {
