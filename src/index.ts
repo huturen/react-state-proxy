@@ -134,8 +134,8 @@ function initializeStates(stateData: Record<string, any>, proxy: object, save: F
       })();
     }
     else if (typeof item === 'function') {
-      // bind this and the first parameter
-      stateData[key] = stateData[key].bind(proxy, proxy);
+      // bind this for function configuration
+      stateData[key] = stateData[key].bind(proxy);
     }
   }
 }
