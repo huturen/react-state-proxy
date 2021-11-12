@@ -155,42 +155,6 @@ export default class Welcome extends React.Component {
 
 ```tsx
 // models/num.ts
-import { stateProxy } from 'react-state-proxy';
-
-// 注意：[stateTarget] 需要放置在 modelNum 方法外面。
-// 如果你想在多个组件中共享同一个状态， [stateTarget]需要指向同一个对象。
-const stateTarget = { num: 0 };
-export default function modelNum() {
-  const state = stateProxy(stateTarget);
-  return {
-    inc() {
-      state.num++;
-    },
-    get num() {
-      return state.num;
-    },
-    get sum() {
-      return state.num + 10;
-    },
-  };
-}
-
-// components/business.tsx
-import modelNum from '@/models/num';
-export default function Hello() {
-  const { num, inc, sum } = modelNum();
-  return (
-    <div>
-      <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
-    </div>
-  );
-}
-```
-
-或者使用另外一种方式， 直接用 `stateProxy` 代理目标状态对象。
-
-```tsx
-// models/num.ts
 export default {
   num: 0,
   inc() {
@@ -215,10 +179,11 @@ export default function Hello() {
 ```
 
 
-**异步状态**: 支持在异步方法中变更状态。
+**异步状态**:
+
+react-state-proxy 提供了一个可选的方法来管理你的异步状态。
 
 ```tsx
-// 方式 1: react-state-proxy 提供了一个可选的方法来管理你的异步状态。
 import { stateProxy, asyncState } from 'react-state-proxy';
 
 export default function AsyncComponent() {
@@ -233,20 +198,27 @@ export default function AsyncComponent() {
   // 1秒后，下面按钮的文本将从 'loading...' 变成 'done'。
   return <button>{state.status.value}</button>;
 }
+```
 
-// 方式 2: 使用 __init__ 方法
+**初始化**:
+
+当stateProxy 初始化时， `__init__` 方法会被自动调用。
+即使组件多次重渲染，这个方法也只会被初始化一次。
+
+```tsx
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
   const state = stateProxy({
     status: 'pending',
-    // 当stateProxy 初始化时， __init__ 会被自动调用
+
     async __init__() {
       this.status = 'loading';
       await new Promise((resolve) => setTimeout(resolve, 1000));
       this.status = 'loaded';
     },
   });
+  // the text of the button below will be changed from 'loading...' to 'loaded' after 1 second.
   return <button>{state.status}</button>;
 }
 ```
@@ -298,7 +270,7 @@ export default function Hello() {
 *注意:* `stateProxy` 不能用在类组件中，同样的，`stateProxyForClassComponent`也不能用于函数组件中。
 
 
-### asyncState(asyncFunction: Function, initialValue: any = '', fallbackValue?: any)
+### asyncState(asyncFunction: Function, initialValue: any = null, fallbackValue: any = null)
 
 返回一个异步状态，其数据结构如下所示：
 
@@ -315,10 +287,6 @@ type AsyncState = {
 - initialValue: 调用 *asyncFunction* 前的初始状态值。
 - fallbackValue: 执行异常时的状态值。
 
-
-### async(initialValue: any, asyncFunction: Function, fallbackValue: any = null)
-
-`asyncState`的另一个更短的可选版本， 表现和`asyncState`一样, 只是参数顺序不一样。
 
 
 ## License

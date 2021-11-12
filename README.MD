@@ -158,43 +158,6 @@ For a large application, you can separate your state data from your business cod
 
 ```tsx
 // models/num.ts
-import { stateProxy } from 'react-state-proxy';
-
-// [stateTarget] is needed to be out of the model function below.
-// If you want to share states between multiple components,
-// [stateTarget] must be pointed to the same object.
-const stateTarget = { num: 0 };
-export default function modelNum() {
-  const state = stateProxy(stateTarget);
-  return {
-    inc() {
-      state.num++;
-    },
-    get num() {
-      return state.num;
-    },
-    get sum() {
-      return state.num + 10;
-    },
-  };
-}
-
-// components/business.tsx
-import modelNum from '@/models/num';
-export default function Hello() {
-  const { num, inc, sum } = modelNum();
-  return (
-    <div>
-      <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
-    </div>
-  );
-}
-```
-
-Or in another way, just use `stateProxy` directly.
-
-```tsx
-// models/num.ts
 export default {
   num: 0,
   inc() {
@@ -207,9 +170,9 @@ export default {
 
 // components/business.tsx
 import { stateProxy } from 'react-state-proxy';
-import modelData from '@/models/num';
+import stateTarget from '@/models/num';
 export default function Hello() {
-  const { num, inc, sum } = stateProxy(modelData);
+  const { num, inc, sum } = stateProxy(stateTarget);
   return (
     <div>
       <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
@@ -221,8 +184,9 @@ export default function Hello() {
 
 **Async state**:
 
+`react-state-proxy` supplys an optional function to manage your async states.
+
 ```tsx
-// Way 1: `react-state-proxy` supplys an optional function to manage your async states.
 import { stateProxy, asyncState } from 'react-state-proxy';
 
 export default function AsyncComponent() {
@@ -237,21 +201,28 @@ export default function AsyncComponent() {
   // the text of the button below will be changed from 'loading...' to 'done' after 1 second.
   return <button>{state.status.value}</button>;
 }
+```
 
-// Way 2: Use __init__ method
+
+**Initialization**:
+
+`__init__` method will be called automatically when `stateProxy` initializes the state.
+It will only be called once, even when re-rendered multiple times.
+
+```tsx
 import { stateProxy } from 'react-state-proxy';
 
 export default function AsyncComponent() {
   const state = stateProxy({
     status: 'pending',
 
-    // __init__ will be called automatically when stateProxy initializes a stateTarget.
     async __init__() {
       this.status = 'loading';
       await new Promise((resolve) => setTimeout(resolve, 1000));
       this.status = 'loaded';
     },
   });
+  // the text of the button below will be changed from 'loading...' to 'loaded' after 1 second.
   return <button>{state.status}</button>;
 }
 ```
@@ -303,7 +274,7 @@ Alias:
 
 *Note:* `stateProxy` can not be used in a class component and vice versa for `stateProxyForClassComponent`.
 
-### asyncState(asyncFunction: Function, initialValue: any = '', fallbackValue?: any)
+### asyncState(asyncFunction: Function, initialValue: any = null, fallbackValue: any = null)
 
 Return a dynamic asynchronous state like below.
 
@@ -319,13 +290,6 @@ type AsyncState = {
 - asyncFunction: The asynchronous function used to get the dynamic state.
 - initialValue: Initial state value before calling *asyncFunction*.
 - fallbackValue: Fallback state value when an exception occurs.
-
-
-
-### async(initialValue: any, asyncFunction: Function, fallbackValue: any = null)
-
-A shorter alternative version of `asyncState`.
-The same as `asyncState`, but with different parameters.
 
 
 ## License
