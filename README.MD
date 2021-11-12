@@ -206,7 +206,7 @@ export default function AsyncComponent() {
 
 **Initialization**:
 
-`__init__` method will be called automatically when `stateProxy` initializes the state.
+`__init__` method will be called automatically when `stateProxy` initializes a state.
 It will only be called once, even when re-rendered multiple times.
 
 ```tsx
