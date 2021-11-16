@@ -85,12 +85,14 @@ export function stateProxy<State extends object>(stateTarget: State): State {
   const save = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      for (const [setStateFun, cachedStateTarget] of subscribers) {
-        // trigger re-render, only for the same state target
-        if (stateData === cachedStateTarget) {
-          setStateFun({});
+      Promise.resolve().then(() => {
+        for (const [setStateFun, cachedStateTarget] of subscribers) {
+          // trigger re-render, only for the same state target
+          if (stateData === cachedStateTarget) {
+            setStateFun({});
+          }
         }
-      }
+      });
     });
   };
 
@@ -113,7 +115,7 @@ export function stateProxy<State extends object>(stateTarget: State): State {
     },
   };
 
-  const proxy = new Proxy(stateData as State, handler) as State
+  const proxy = new Proxy(stateData as State, handler) as State;
   initializeStates(stateData, proxy, save);
   return proxy;
 }
@@ -125,15 +127,13 @@ function initializeStates(stateData: Record<string, any>, proxy: object, save: F
       delete item.asyncStateSymbol;
       item.getAsyncState().finally(() => save());
       delete item.getAsyncState;
-    }
-    else if (key === '__init__' && typeof item === 'function') {
+    } else if (key === '__init__' && typeof item === 'function') {
       delete stateData[key];
       (async () => {
         await item.call(stateData);
         save();
       })();
-    }
-    else if (typeof item === 'function') {
+    } else if (typeof item === 'function') {
       // bind this for function configuration
       stateData[key] = stateData[key].bind(proxy);
     }
@@ -165,12 +165,14 @@ export function stateProxyForClassComponent<State extends object>(component: Com
   const save = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      for (const [setStateFun, cachedStateTarget] of subscribers) {
-        // trigger re-render, only for the same state target
-        if (stateData === cachedStateTarget) {
-          setStateFun({});
+      Promise.resolve().then(() => {
+        for (const [setStateFun, cachedStateTarget] of subscribers) {
+          // trigger re-render, only for the same state target
+          if (stateData === cachedStateTarget) {
+            setStateFun({});
+          }
         }
-      }
+      });
     });
   };
 
