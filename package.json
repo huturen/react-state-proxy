@@ -1,6 +1,6 @@
 {
   "name": "react-state-proxy",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "The most simplified react state management library.",
   "main": "dist/index.js",
   "scripts": {

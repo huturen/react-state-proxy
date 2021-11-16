@@ -11,16 +11,16 @@ function isObj(obj: any) {
   return {}.toString.call(obj) === '[object Object]';
 }
 
-function isPrimitive(variable: any) {
-  return (
-    typeof variable === 'number' ||
-    typeof variable === 'string' ||
-    typeof variable === 'boolean' ||
-    typeof variable === 'undefined' ||
-    typeof variable === 'symbol' ||
-    variable === null
-  );
-}
+// function isPrimitive(variable: any) {
+//   return (
+//     typeof variable === 'number' ||
+//     typeof variable === 'string' ||
+//     typeof variable === 'boolean' ||
+//     typeof variable === 'undefined' ||
+//     typeof variable === 'symbol' ||
+//     variable === null
+//   );
+// }
 
 type AsyncState = {
   value: any; // The dynamic state value. To be one of initialValue, resolvedValue or fallbackValue.
@@ -103,7 +103,7 @@ export function stateProxy<State extends object>(stateTarget: State): State {
     set(target: Target, key: string, value: any, receiver: any) {
       const prev = Reflect.get(target, key, receiver);
       const res = Reflect.set(target, key, wrap(value), receiver);
-      if (!isPrimitive(prev) || prev !== value) {
+      if (prev !== value) {
         save();
       }
       return res;
@@ -183,7 +183,7 @@ export function stateProxyForClassComponent<State extends object>(component: Com
     set(target: Target, key: string, value: any, receiver: any) {
       const prev = Reflect.get(target, key, receiver);
       const res = Reflect.set(target, key, wrap(value), receiver);
-      if (!isPrimitive(prev) || prev !== value) {
+      if (prev !== value) {
         save();
       }
       return res;
