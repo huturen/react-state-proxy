@@ -191,7 +191,7 @@ export default function Hello() {
 
 **Async state**:
 
-`react-state-proxy` supplys an optional function to manage your async states.
+`react-state-proxy` supplys an extra function to manage your async states.
 Note: The async function will only be initialized once.
 
 ```tsx
@@ -210,6 +210,32 @@ export default function AsyncComponent() {
   return <button>{state.status.value}</button>;
 }
 ```
+
+
+**Initialization**:
+
+`__init__` method will be called automatically when `stateProxy` initializes a state.
+Note: This method will only be initialized once.
+
+```tsx
+import { stateProxy } from 'react-state-proxy';
+
+export default function AsyncComponent() {
+  const state = stateProxy({
+    status: 'pending',
+
+    async __init__() {
+      this.status = 'loading';
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      this.status = 'loaded';
+    },
+  });
+  // the text of the button below will be changed from 'loading...' to 'loaded' after 1 second.
+  return <button>{state.status}</button>;
+}
+```
+
+
 
 ## Batched re-render
 Multiple synchronous state mutations will not result in multiple re-renders.

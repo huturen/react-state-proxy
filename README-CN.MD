@@ -188,7 +188,7 @@ export default function Hello() {
 
 **异步状态**:
 
-react-state-proxy 提供了一个可选的方法来管理你的异步状态。
+react-state-proxy 提供了一个额外的方法来管理你的异步状态。
 注意: 指定的异步方法只会被初始化一次。
 
 ```tsx
@@ -207,6 +207,30 @@ export default function AsyncComponent() {
   return <button>{state.status.value}</button>;
 }
 ```
+
+**初始化**:
+
+当stateProxy 初始化时， `__init__` 方法会被自动调用。
+即使组件多次重渲染，这个方法也只会被初始化一次。
+
+```tsx
+import { stateProxy } from 'react-state-proxy';
+
+export default function AsyncComponent() {
+  const state = stateProxy({
+    status: 'pending',
+
+    async __init__() {
+      this.status = 'loading';
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      this.status = 'loaded';
+    },
+  });
+  // the text of the button below will be changed from 'loading...' to 'loaded' after 1 second.
+  return <button>{state.status}</button>;
+}
+```
+
 
 
 ## 批量重渲染
