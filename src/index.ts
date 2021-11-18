@@ -1,7 +1,7 @@
 import { Component, useLayoutEffect, useState } from 'react';
 // import { Component, useEffect, useState } from 'react';
 
-type Target = Record<string, any> | any[];
+type Target = Record<string, any>;
 
 function isObjOrArr(obj: any) {
   return {}.toString.call(obj) === '[object Object]' || {}.toString.call(obj) === '[object Array]';
@@ -10,17 +10,6 @@ function isObjOrArr(obj: any) {
 function isObj(obj: any) {
   return {}.toString.call(obj) === '[object Object]';
 }
-
-// function isPrimitive(variable: any) {
-//   return (
-//     typeof variable === 'number' ||
-//     typeof variable === 'string' ||
-//     typeof variable === 'boolean' ||
-//     typeof variable === 'undefined' ||
-//     typeof variable === 'symbol' ||
-//     variable === null
-//   );
-// }
 
 type AsyncState = {
   value: any; // The dynamic state value. To be one of initialValue, resolvedValue or fallbackValue.
@@ -40,15 +29,16 @@ export function asyncState(asyncFunction: Function, initialValue: any = null, fa
     valueOf() {
       return res.value;
     },
+
     asyncStateSymbol,
-    getAsyncState: async () => {
+    getAsyncState: async (proxy: object) => {
       try {
-        const result = await asyncFunction();
+        const result = await asyncFunction.call(proxy);
         res.value = result;
         res.resolved = true;
       } catch (err: any) {
-        res.rejected = err;
         res.value = fallbackValue;
+        res.rejected = err;
       }
     },
   };
@@ -60,35 +50,33 @@ export function async(initialValue: any, asyncFunction: Function, fallbackValue:
   return asyncState(asyncFunction, initialValue, fallbackValue);
 }
 
-const subscribers: Map<Function, object> = new Map();
+// subscribers: Map<setStateFunction, cachedStateProxy>
+const subscribers: Map<Function, Target> = new Map();
 
-export function stateProxy<State extends object>(stateTarget: State): State {
+const stateProxySymbol = Symbol('stateProxySymbol');
+export function stateWrapper<State extends Target>(stateTarget: State): State {
   if (!isObj(stateTarget)) {
-    throw new Error('react-state-proxy[stateProxy]: The [stateTarget] must be an object.');
+    throw new Error('react-state-proxy[stateWrapper]: The [stateTarget] must be an object.');
   }
-  const [, setState] = useState({});
-  if (!subscribers.has(setState)) {
-    subscribers.set(setState, stateTarget); // add subscriber & set a cache
+  if (stateTarget.____rsp_proxy____ === stateProxySymbol) {
+    return stateTarget;
   }
-  const stateData: Record<string, any> = subscribers.get(setState)!;
 
   let timer: NodeJS.Timeout;
-  useLayoutEffect(() => {
-    return () => {
-      clearTimeout(timer);
-      subscribers.delete(setState);
-    };
-  }, []);
 
-  // Instead of using Symbol.toStringTag, we use ____rsp_proxy____ property to check Proxy instance.
-  const wrap = (obj: any) => (isObjOrArr(obj) && !obj.____rsp_proxy____ ? new Proxy(obj, handler) : obj);
+  const wrap = (obj: any) => {
+    // Instead of using Symbol.toStringTag, we use ____rsp_proxy____ property to check Proxy instance.
+    return isObjOrArr(obj) && obj.____rsp_proxy____ !== stateProxySymbol ? new Proxy(obj, handler) : obj;
+  };
+
   const save = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
+      // fix setTimeout violation problem
       Promise.resolve().then(() => {
-        for (const [setStateFun, cachedStateTarget] of subscribers) {
-          // trigger re-render, only for the same state target
-          if (stateData === cachedStateTarget) {
+        for (const [setStateFun, cachedProxy] of subscribers) {
+          if (proxy === cachedProxy || stateTarget === cachedProxy.____rsp_target____) {
+            // trigger re-render, only for the same state target
             setStateFun({});
           }
         }
@@ -98,16 +86,32 @@ export function stateProxy<State extends object>(stateTarget: State): State {
 
   const handler = {
     get(target: Target, key: string, receiver: any): any {
-      return key === '____rsp_proxy____' ? true : wrap(Reflect.get(target, key, receiver));
+      // react state proxy object identity
+      if (key === '____rsp_proxy____') {
+        return stateProxySymbol;
+      }
+      // original state target identity
+      if (key === '____rsp_target____' && target === stateTarget) {
+        return stateTarget;
+      }
+      // bind proxy object for function configuration option
+      const res = wrap(Reflect.get(target, key, receiver));
+      if (typeof res === 'function' && target === stateTarget) {
+        return res.bind(proxy);
+      }
+      return res;
     },
+
     set(target: Target, key: string, value: any, receiver: any) {
-      const prev = Reflect.get(target, key, receiver);
-      const res = Reflect.set(target, key, wrap(value), receiver);
+      const prev = Reflect.get(target, key as string, receiver);
+      const res = Reflect.set(target, key as string, wrap(value), receiver);
+      // avoid unnecessary re-render
       if (prev !== value) {
         save();
       }
       return res;
     },
+
     deleteProperty(target: Target, key: string) {
       const res = Reflect.deleteProperty(target, key);
       save();
@@ -115,32 +119,49 @@ export function stateProxy<State extends object>(stateTarget: State): State {
     },
   };
 
-  const proxy = new Proxy(stateData as State, handler) as State;
-  initializeStates(stateData, proxy, save);
+  const proxy = new Proxy(stateTarget as State, handler) as State;
+  initializeStateTarget(stateTarget, proxy, save);
   return proxy;
 }
 
-function initializeStates(stateData: Record<string, any>, proxy: object, save: Function) {
+function initializeStateTarget(stateData: Target, proxy: object, save: Function) {
   for (let key in stateData) {
     const item = stateData[key];
     if (isObj(item) && item.asyncStateSymbol === asyncStateSymbol) {
       delete item.asyncStateSymbol;
-      item.getAsyncState().finally(() => save());
+      item.getAsyncState(proxy).finally(() => save());
       delete item.getAsyncState;
     } else if (key === '__init__' && typeof item === 'function') {
       delete stateData[key];
       (async () => {
-        await item.call(stateData);
+        await item.call(proxy);
         save();
       })();
-    } else if (typeof item === 'function') {
-      // bind this for function configuration
-      stateData[key] = stateData[key].bind(proxy);
     }
   }
 }
 
-export function stateProxyForClassComponent<State extends object>(component: Component, stateTarget: State): State {
+export function stateProxy<State extends Target>(stateTarget: State): State {
+  if (!isObj(stateTarget)) {
+    throw new Error('react-state-proxy[stateWrapper]: The [stateTarget] must be an object.');
+  }
+  const [, setState] = useState({});
+
+  // wrap the specified stateTarget & add proxy instance to the subscriber list
+  if (!subscribers.has(setState)) {
+    subscribers.set(setState, stateWrapper(stateTarget));
+  }
+
+  useLayoutEffect(() => {
+    return () => {
+      subscribers.delete(setState);
+    };
+  }, []);
+
+  return subscribers.get(setState) as State;
+}
+
+export function stateProxyForClassComponent<State extends Target>(component: Component, stateTarget: State) {
   if (!isObj(stateTarget)) {
     throw new Error('react-state-proxy[stateProxyForClassComponent]: The [stateTarget] must be an object.');
   }
@@ -148,58 +169,20 @@ export function stateProxyForClassComponent<State extends object>(component: Com
   // bind is required here, otherwise setState will always point to the same object even if different components
   const setState = component.setState.bind(component);
   if (!subscribers.has(setState)) {
-    subscribers.set(setState, stateTarget);
+    subscribers.set(setState, stateWrapper(stateTarget));
   }
-  const stateData: Record<string, any> = subscribers.get(setState)!;
 
-  let timer: NodeJS.Timeout;
   const original = component.componentWillUnmount?.bind(component);
   component.componentWillUnmount = function () {
-    clearTimeout(timer);
     subscribers.delete(setState);
     return original?.();
   };
 
-  // Instead of using Symbol.toStringTag, we use ____rsp_proxy____ property to check Proxy instance.
-  const wrap = (obj: any) => (isObjOrArr(obj) && !obj.____rsp_proxy____ ? new Proxy(obj, handler) : obj);
-  const save = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      Promise.resolve().then(() => {
-        for (const [setStateFun, cachedStateTarget] of subscribers) {
-          // trigger re-render, only for the same state target
-          if (stateData === cachedStateTarget) {
-            setStateFun({});
-          }
-        }
-      });
-    });
-  };
-
-  const handler = {
-    get(target: Target, key: string, receiver: any): any {
-      return key === '____rsp_proxy____' ? true : wrap(Reflect.get(target, key, receiver));
-    },
-    set(target: Target, key: string, value: any, receiver: any) {
-      const prev = Reflect.get(target, key, receiver);
-      const res = Reflect.set(target, key, wrap(value), receiver);
-      if (prev !== value) {
-        save();
-      }
-      return res;
-    },
-    deleteProperty(target: Target, key: string) {
-      const res = Reflect.deleteProperty(target, key);
-      save();
-      return res;
-    },
-  };
-
-  const proxy = new Proxy(stateData!, handler) as State;
-  initializeStates(stateData, proxy, save);
-  return proxy;
+  return subscribers.get(setState) as State;
 }
 
+// alias
+export const createState = stateWrapper;
 export const stateProxyForCC = stateProxyForClassComponent;
 export const stateProxy4ClassComponent = stateProxyForClassComponent;
 export const stateProxy4CC = stateProxyForClassComponent;

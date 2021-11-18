@@ -12,7 +12,7 @@ class State3 extends React.Component {
   statex = stateProxy4CC(this, 0 as any);
 }
 
-it('number: should throw an exception when stateTarget was not an object', async () => {
+it('exception: should throw an exception when stateTarget was not an object', async () => {
   const original = console.error;
   console.error = jest.fn();
   try {

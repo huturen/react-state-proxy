@@ -158,7 +158,10 @@ For a large application, you can separate your state data from your business cod
 
 ```tsx
 // models/num.ts
-export default {
+import { stateWrapper } from 'react-state-proxy';
+// In general, stateWrapper method is optional, however, it is needed
+// if you want to manage your states outside of a React component.
+export default stateWrapper({
   num: 0,
   inc() {
     this.num++;
@@ -166,13 +169,17 @@ export default {
   get sum() {
     return this.num + 10;
   },
-};
+});
 
 // components/business.tsx
 import { stateProxy } from 'react-state-proxy';
-import stateTarget from '@/models/num';
+import state from '@/models/num';
+
+// You can manage the states outsite of a React component.
+setInterval(state.inc, 2000);
+
 export default function Hello() {
-  const { num, inc, sum } = stateProxy(stateTarget);
+  const { num, inc, sum } = stateProxy(state);
   return (
     <div>
       <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
@@ -185,6 +192,7 @@ export default function Hello() {
 **Async state**:
 
 `react-state-proxy` supplys an optional function to manage your async states.
+Note: The async function will only be initialized once.
 
 ```tsx
 import { stateProxy, asyncState } from 'react-state-proxy';
@@ -200,30 +208,6 @@ export default function AsyncComponent() {
 
   // the text of the button below will be changed from 'loading...' to 'done' after 1 second.
   return <button>{state.status.value}</button>;
-}
-```
-
-
-**Initialization**:
-
-`__init__` method will be called automatically when `stateProxy` initializes a state.
-It will only be called once, even when re-rendered multiple times.
-
-```tsx
-import { stateProxy } from 'react-state-proxy';
-
-export default function AsyncComponent() {
-  const state = stateProxy({
-    status: 'pending',
-
-    async __init__() {
-      this.status = 'loading';
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      this.status = 'loaded';
-    },
-  });
-  // the text of the button below will be changed from 'loading...' to 'loaded' after 1 second.
-  return <button>{state.status}</button>;
 }
 ```
 
@@ -255,15 +239,20 @@ export default function Hello() {
 
 
 ## API
+### stateWrapper<State extends object>(stateTarget: State)
+
+It returns a proxied state which is non-reactive but can be managed outside of a React component.
+You can subscribe it in `stateProxy`, which will trigger re-render when state changes.
+In general, it's optional, except for managing states outside of a component.
 
 ### stateProxy<State extends object>(stateTarget: State)
 
-Create a reactive state object for `Function Component`.
+Subscribe & create a reactive state object for `Function Component`.
 It must be used within a function component or it's children.
 
 ### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State)
 
-Create a reactive state object for `Class Component`.
+Subscribe & create a reactive state object for `Class Component`.
 It must be used within a class component or it's children.
 
 Alias:

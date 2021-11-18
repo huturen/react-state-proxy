@@ -155,7 +155,10 @@ export default class Welcome extends React.Component {
 
 ```tsx
 // models/num.ts
-export default {
+import { stateWrapper } from 'react-state-proxy';
+// 'stateWrapper'是可选的，一般来说不用配置，但是，
+// 如果你想在React组件外面来管理你的状态，就需要配置它了。
+export default stateWrapper({
   num: 0,
   inc() {
     this.num++;
@@ -163,13 +166,17 @@ export default {
   get sum() {
     return this.num + 10;
   },
-};
+});
 
 // components/business.tsx
 import { stateProxy } from 'react-state-proxy';
-import modelData from '@/models/num';
+import state from '@/models/num';
+
+// 你可以在react组件外面来管理你的状态。
+setInterval(state.inc, 2000);
+
 export default function Hello() {
-  const { num, inc, sum } = stateProxy(modelData);
+  const { num, inc, sum } = stateProxy(state);
   return (
     <div>
       <button onClick={inc}>{num}</button> + 10 = <span>{sum}</span>
@@ -182,6 +189,7 @@ export default function Hello() {
 **异步状态**:
 
 react-state-proxy 提供了一个可选的方法来管理你的异步状态。
+注意: 指定的异步方法只会被初始化一次。
 
 ```tsx
 import { stateProxy, asyncState } from 'react-state-proxy';
@@ -197,29 +205,6 @@ export default function AsyncComponent() {
 
   // 1秒后，下面按钮的文本将从 'loading...' 变成 'done'。
   return <button>{state.status.value}</button>;
-}
-```
-
-**初始化**:
-
-当stateProxy 初始化时， `__init__` 方法会被自动调用。
-即使组件多次重渲染，这个方法也只会被初始化一次。
-
-```tsx
-import { stateProxy } from 'react-state-proxy';
-
-export default function AsyncComponent() {
-  const state = stateProxy({
-    status: 'pending',
-
-    async __init__() {
-      this.status = 'loading';
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      this.status = 'loaded';
-    },
-  });
-  // the text of the button below will be changed from 'loading...' to 'loaded' after 1 second.
-  return <button>{state.status}</button>;
 }
 ```
 
@@ -253,13 +238,19 @@ export default function Hello() {
 
 ## API
 
+### stateWrapper<State extends object>(stateTarget: State)
+
+封装并返回一个状态，状态不具有响应式，但是你可以在react组件外面来管理这些状态。
+你可以在`stateProxy`方法中来订阅这些状态，订阅之后，当状态发生改变时会触发组件重渲染。
+通常来说，这个API是可选的，你一般不用将状态包裹其中，除非你想在组件外面来管理这些状态。
+
 ### stateProxy<State extends object>(stateTarget: State)
 
-针对函数组件，创建一个响应式的状态对象, 这个方法只能在函数组件或其子方法中调用。
+针对函数组件，订阅并创建一个响应式的状态对象, 这个方法只能在函数组件或其子方法中调用。
 
 ### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State)
 
-针对类组件，创建一个响应式的状态对象, 这个方法只能在类组件或其子方法中调用，创建的对象不能替换原生的`state`对象。
+针对类组件，订阅并创建一个响应式的状态对象, 这个方法只能在类组件或其子方法中调用，创建的对象不能替换原生的`state`对象。
 
 别名:
 

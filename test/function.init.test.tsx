@@ -29,4 +29,6 @@ it('__init__: __init__ method should be called for function component', async ()
 
   expect(btn.innerHTML).toBe('0');
   waitFor(() => expect(btn.innerHTML).toBe('999'));
+  // await call of 'save' function
+  await new Promise(resolve => setTimeout(resolve, 1));
 });
