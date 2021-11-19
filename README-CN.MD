@@ -14,6 +14,7 @@
 ## 特性
 
 - 极其容易使用
+- 无样板、套路代码
 - 只需一个API调用就能设置完毕
 - 支持函数及类组件
 - 对新手相当友好
@@ -31,9 +32,17 @@
 import { stateProxy } from 'react-state-proxy';
 
 export default function Hello() {
-  const state = stateProxy({ num: 0 });
+  const { num, inc, double } = stateProxy({
+    num: 0,
+    inc() {
+      this.num++; // `this`指向返回的响应式状态
+    },
+    get double() {
+      return this.num * 2;
+    },
+  });
 
-  return <button onClick={ () => state.num++ }>Count: {state.num}</button>;
+  return <button onClick={inc}>Number: {num} Double: {double}</button>
 }
 ```
 

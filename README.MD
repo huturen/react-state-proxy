@@ -13,6 +13,7 @@ The most simplified react state management library.
 ## Features
 
 - Extremely easy to use
+- No boilerplate code
 - Just one API to set it up
 - Support for `Function Component` and `Class Component`
 - Friendly for beginners
@@ -31,9 +32,17 @@ It supplys a new way to simplify your react state management with just one funct
 import { stateProxy } from 'react-state-proxy';
 
 export default function Hello() {
-  const state = stateProxy({ num: 0 });
+  const { num, inc, double } = stateProxy({
+    num: 0,
+    inc() {
+      this.num++; // `this` object points to the reactive state
+    },
+    get double() {
+      return this.num * 2;
+    },
+  });
 
-  return <button onClick={ () => state.num++ }>Count: {state.num}</button>;
+  return <button onClick={inc}>Number: {num} Double: {double}</button>
 }
 ```
 
