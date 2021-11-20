@@ -143,7 +143,7 @@ function initializeStateTarget(stateData: Target, proxy: object, save: Function)
 
 export function stateProxy<State extends Target>(stateTarget: State): State {
   if (!isObj(stateTarget)) {
-    throw new Error('react-state-proxy[stateWrapper]: The [stateTarget] must be an object.');
+    throw new Error('react-state-proxy[stateProxy]: The [stateTarget] must be an object.');
   }
   const [, setState] = useState({});
 
