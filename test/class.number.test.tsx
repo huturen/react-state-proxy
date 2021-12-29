@@ -14,14 +14,14 @@ class State extends React.Component {
       <div>
         <button data-testid="number" onClick={() => this.statex.counter++}>{this.statex.counter}</button>
       </div>
-    )
+    );
   }
 }
 
 it('number: should re-render when counter chagned', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("number");
+  const btn = getByTestId('number');
   expect(btn.innerHTML).toBe('0');
 
   fireEvent.click(btn);

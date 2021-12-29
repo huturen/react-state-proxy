@@ -14,14 +14,14 @@ class State extends React.Component {
       <div>
         <button data-testid="string" onClick={() => this.statex.string += 'world'}>{this.statex.string}</button>
       </div>
-    )
+    );
   }
 }
 
 it('string: should re-render when string chagned', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("string");
+  const btn = getByTestId('string');
   expect(btn.innerHTML).toBe('hello');
 
   fireEvent.click(btn);

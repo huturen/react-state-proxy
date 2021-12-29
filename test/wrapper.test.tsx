@@ -28,20 +28,21 @@ it('wrapper: should throw an exception when stateTarget was not an object', asyn
 
 it('wrapper: should get the same proxied object when overlapped calls', async () => {
   const target = { num: 1 };
-    const state1 = stateWrapper(target);
-    const state2 = stateWrapper(state1);
-    expect(state1).toBe(state2);
+  const state1 = stateWrapper(target);
+  const state2 = stateWrapper(state1);
+  expect(state1).toBe(state2);
 });
 
 it('wrapper: should get the different proxied object for different target', async () => {
-    const state1 = stateWrapper({ num: 1 });
-    const state2 = stateWrapper({ num: 1 });
-    expect(state1).not.toBe(state2);
+  const state1 = stateWrapper({ num: 1 });
+  const state2 = stateWrapper({ num: 1 });
+  expect(state1).not.toBe(state2);
 });
 
 it('wrapper: should get the original target by ____rsp_target____', async () => {
   const target = { num: 1 };
   const state = stateWrapper(target);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   expect(state.____rsp_target____).toBe(target);
 });

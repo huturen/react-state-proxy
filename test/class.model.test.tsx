@@ -6,7 +6,7 @@ import { stateProxy4CC } from '../src/index';
 
 const stateTarget = {
   counter: 0,
-}
+};
 
 class ModelState extends React.Component {
   statex = stateProxy4CC(this, stateTarget);
@@ -15,14 +15,14 @@ class ModelState extends React.Component {
       <div>
         <button data-testid="number" onClick={() => this.statex.counter++}>{this.statex.counter}</button>
       </div>
-    )
+    );
   }
 }
 
 it('model: should re-render when stateTarget chagned', async () => {
   const { getByTestId } = render(<ModelState />);
 
-  const btn = getByTestId("number");
+  const btn = getByTestId('number');
   expect(btn.innerHTML).toBe('0');
 
   fireEvent.click(btn);
@@ -35,7 +35,7 @@ it('model: should re-render when stateTarget chagned', async () => {
 it('model: should get updated state when the second ModelState initialized', async () => {
   const { getByTestId } = render(<ModelState />);
 
-  const btn = getByTestId("number");
+  const btn = getByTestId('number');
   expect(btn.innerHTML).toBe('2');
 
   fireEvent.click(btn);

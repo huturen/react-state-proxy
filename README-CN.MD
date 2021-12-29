@@ -20,6 +20,7 @@
 - 对新手相当友好
 - 针对大型应用有极强的可扩展性
 - 批量重渲染
+- 订阅重渲染
 - 支持异步状态
 
 
@@ -265,6 +266,30 @@ export default function Hello() {
 
   // 在 [updateUser]方法中，尽管状态改变了3次，但只会触发一次重渲染。
   return <button onClick={updateUser}>User: {JSON.stringify(state)}</button>;
+}
+```
+
+
+## 订阅重渲染
+为指定的key订阅重渲染。
+
+```jsx
+import { stateProxy } from 'react-state-proxy';
+
+let times = 0;
+export default function Hello() {
+  const state = stateProxy({
+    name: 'Lucy',
+    age: 18,
+    times: 1,
+    email: 'lucy@gmail.com',
+  }, ['age']);
+
+  // 这个方法，只有在[age]改变的时候，才会触发重渲染。
+  return (<div>
+    <button onClick={state.age++}>Age: {age}</button>
+    <button onClick={state.times++}>Times: {times}</button>
+  </div>);
 }
 ```
 

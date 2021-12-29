@@ -6,20 +6,20 @@ import { stateProxy } from '../src/index';
 
 const stateTarget = {
   counter: 0,
-}
+};
 function ModelState() {
   const state = stateProxy(stateTarget);
   return (
     <div>
       <button data-testid="number" onClick={() => state.counter++}>{state.counter}</button>
     </div>
-  )
+  );
 }
 
 it('model: should re-render when stateTarget chagned', async () => {
   const { getByTestId } = render(<ModelState />);
 
-  const btn = getByTestId("number");
+  const btn = getByTestId('number');
   expect(btn.innerHTML).toBe('0');
 
   fireEvent.click(btn);
@@ -32,7 +32,7 @@ it('model: should re-render when stateTarget chagned', async () => {
 it('model: should get updated state when the second ModelState initialized', async () => {
   const { getByTestId } = render(<ModelState />);
 
-  const btn = getByTestId("number");
+  const btn = getByTestId('number');
   expect(btn.innerHTML).toBe('2');
 
   fireEvent.click(btn);

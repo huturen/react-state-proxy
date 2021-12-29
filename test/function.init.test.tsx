@@ -15,7 +15,7 @@ function State() {
     <div>
       <button data-testid="number">{state.counter}</button>
     </div>
-  )
+  );
 }
 
 it('__init__: __init__ method should be called for function component', async () => {
@@ -24,7 +24,7 @@ it('__init__: __init__ method should be called for function component', async ()
   // To avoid: "Warning: An update to State inside a test was not wrapped in act(...)."
   act(() => {
     const { getByTestId } = render(<State />);
-    btn = getByTestId("number");
+    btn = getByTestId('number');
   });
 
   expect(btn.innerHTML).toBe('0');

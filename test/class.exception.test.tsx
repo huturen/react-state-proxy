@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render } from '@testing-library/react';
 import React from 'react';
 import { stateProxy4CC } from '../src/index';
@@ -16,19 +17,19 @@ it('exception: should throw an exception when stateTarget was not an object', as
   const original = console.error;
   console.error = jest.fn();
   try {
-    render(<State1 />)
+    render(<State1 />);
   } catch(e) {
     expect(e.message).toContain('The [stateTarget] must be an object.');
   }
 
   try {
-    render(<State2 />)
+    render(<State2 />);
   } catch(e) {
     expect(e.message).toContain('The [stateTarget] must be an object.');
   }
 
   try {
-    render(<State3 />)
+    render(<State3 />);
   } catch(e) {
     expect(e.message).toContain('The [stateTarget] must be an object.');
   }

@@ -19,6 +19,7 @@ The most simplified react state management library.
 - Friendly for beginners
 - Strong scalability for a large application
 - Batched re-render
+- Subscribed re-render
 - Support for asynchronous state
 
 
@@ -272,6 +273,29 @@ export default function Hello() {
 }
 ```
 
+## Subscribed re-render
+Re-render for subscribed keys.
+
+```jsx
+import { stateProxy } from 'react-state-proxy';
+
+let times = 0;
+export default function Hello() {
+  const state = stateProxy({
+    name: 'Lucy',
+    age: 18,
+    times: 1,
+    email: 'lucy@gmail.com',
+  }, ['age']);
+
+  // This function will trigger re-render only when [age] is changed.
+  return (<div>
+    <button onClick={state.age++}>Age: {age}</button>
+    <button onClick={state.times++}>Times: {times}</button>
+  </div>);
+}
+```
+
 
 ## API
 ### stateWrapper<State extends object>(stateTarget: State)
@@ -280,12 +304,12 @@ It returns a proxied state which is non-reactive but can be managed outside of a
 You can subscribe it in `stateProxy`, which will trigger re-render when state changes.
 In general, it's optional, except for managing states outside of a component.
 
-### stateProxy<State extends object>(stateTarget: State)
+### stateProxy<State extends object>(stateTarget: State, subscribedKeys: string[])
 
 Subscribe & create a reactive state object for `Function Component`.
 It must be used within a function component or it's children.
 
-### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State)
+### stateProxyForClassComponent<State extends object>(component: React.Component, stateTarget: State, subscribedKeys: string[])
 
 Subscribe & create a reactive state object for `Class Component`.
 It must be used within a class component or it's children.

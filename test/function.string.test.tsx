@@ -12,13 +12,13 @@ function State() {
     <div>
       <button data-testid="string" onClick={() => state.string += 'world'}>{state.string}</button>
     </div>
-  )
+  );
 }
 
 it('string: should re-render when string chagned', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("string");
+  const btn = getByTestId('string');
   expect(btn.innerHTML).toBe('hello');
 
   fireEvent.click(btn);

@@ -29,14 +29,14 @@ class State extends React.Component {
           {this.statex.array.join(',')}
         </button>
       </div>
-    )
+    );
   }
 }
 
 it('array-push: should re-render when array pushed', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("array-push");
+  const btn = getByTestId('array-push');
   expect(btn.innerHTML).toBe('0,1,2,3');
 
   fireEvent.click(btn);
@@ -49,7 +49,7 @@ it('array-push: should re-render when array pushed', async () => {
 it('array-pop: should re-render when array poped', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("array-pop");
+  const btn = getByTestId('array-pop');
   expect(btn.innerHTML).toBe('0,1,2,3');
 
   fireEvent.click(btn);
@@ -62,7 +62,7 @@ it('array-pop: should re-render when array poped', async () => {
 it('array-shift: should re-render when array shifted', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("array-shift");
+  const btn = getByTestId('array-shift');
   expect(btn.innerHTML).toBe('0,1,2,3');
 
   fireEvent.click(btn);
@@ -75,7 +75,7 @@ it('array-shift: should re-render when array shifted', async () => {
 it('array-unshift: should re-render when array unshifted', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("array-unshift");
+  const btn = getByTestId('array-unshift');
   expect(btn.innerHTML).toBe('0,1,2,3');
 
   fireEvent.click(btn);
@@ -88,7 +88,7 @@ it('array-unshift: should re-render when array unshifted', async () => {
 it('array-splice: should re-render when array spliced', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("array-splice");
+  const btn = getByTestId('array-splice');
   expect(btn.innerHTML).toBe('0,1,2,3');
 
   fireEvent.click(btn);
@@ -101,7 +101,7 @@ it('array-splice: should re-render when array spliced', async () => {
 it('array-assign: should re-render when array assigned', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("array-assign");
+  const btn = getByTestId('array-assign');
   expect(btn.innerHTML).toBe('0,1,2,3');
 
   fireEvent.click(btn);

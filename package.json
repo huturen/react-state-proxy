@@ -1,6 +1,6 @@
 {
   "name": "react-state-proxy",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "The most simplified react state management library.",
   "main": "dist/index.js",
   "scripts": {
@@ -51,12 +51,15 @@
     "@types/node": "^14.17.18",
     "@types/react": "^17.0.34",
     "@types/webpack": "^5.28.0",
+    "@typescript-eslint/eslint-plugin": "^5.8.1",
+    "@typescript-eslint/parser": "^5.8.1",
     "babel-loader": "^8.1.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "commitizen": "^4.2.1",
     "coveralls": "^3.1.1",
     "del-cli": "^3.0.1",
+    "eslint": "^8.5.0",
     "husky": "^4.3.0",
     "jest": "^27.3.1",
     "react": "^17.0.2",
@@ -81,6 +84,5 @@
   "homepage": "https://github.com/huturen/react-state-proxy#readme",
   "engines": {
     "node": ">=14.13.1"
-  },
-  "dependencies": {}
+  }
 }

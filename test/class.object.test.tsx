@@ -25,14 +25,14 @@ class State extends React.Component {
         <button data-testid="object" onClick={setHij}>{JSON.stringify(this.statex.object)}</button>
         <button data-testid="delete" onClick={delHij}>{JSON.stringify(this.statex.object)}</button>
       </div>
-    )
+    );
   }
 }
 
 it('object: should re-render when object chagned', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("object");
+  const btn = getByTestId('object');
   expect(btn.innerHTML).toBe('{"abc":{"efg":{"hij":"abc"}}}');
 
   fireEvent.click(btn);
@@ -42,7 +42,7 @@ it('object: should re-render when object chagned', async () => {
 it('object: should re-render when object deleted', async () => {
   const { getByTestId } = render(<State />);
 
-  const btn = getByTestId("delete");
+  const btn = getByTestId('delete');
   expect(btn.innerHTML).toBe('{"abc":{"efg":{"hij":"abc"}}}');
 
   fireEvent.click(btn);

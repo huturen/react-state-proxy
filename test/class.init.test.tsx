@@ -19,7 +19,7 @@ class State extends React.Component {
       <div>
         <button data-testid="number">{this.statex.counter}</button>
       </div>
-    )
+    );
   }
 }
 
@@ -29,7 +29,7 @@ it('__init__: __init__ method should be called for class component', async () =>
   // To avoid: "Warning: An update to State inside a test was not wrapped in act(...)."
   act(() => {
     const { getByTestId } = render(<State />);
-    btn = getByTestId("number");
+    btn = getByTestId('number');
   });
 
   expect(btn.innerHTML).toBe('0');

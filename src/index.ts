@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, useLayoutEffect, useState } from 'react';
 // import { Component, useEffect, useState } from 'react';
 
@@ -16,7 +18,7 @@ type AsyncState = {
   resolved: boolean; // It'll be updated after resolving of asyncFunction
   rejected: boolean | Error; // It'll be updated after rejecting of asyncFunction
   valueOf: Function;
-  asyncStateSymbol?: Symbol;
+  asyncStateSymbol?: symbol;
   getAsyncState?: Function;
 };
 
@@ -50,8 +52,8 @@ export function async(initialValue: any, asyncFunction: Function, fallbackValue:
   return asyncState(asyncFunction, initialValue, fallbackValue);
 }
 
-// subscribers: Map<setStateFunction, cachedStateProxy>
-const subscribers: Map<Function, Target> = new Map();
+// subscribers: Map<setStateFunction, [cachedStateProxy, subscribedKeys]>
+const subscribers: Map<Function, [Target, string[]]> = new Map();
 
 const stateProxySymbol = Symbol('stateProxySymbol');
 export function stateWrapper<State extends Target>(stateTarget: State): State {
@@ -69,15 +71,19 @@ export function stateWrapper<State extends Target>(stateTarget: State): State {
     return isObjOrArr(obj) && obj.____rsp_proxy____ !== stateProxySymbol ? new Proxy(obj, handler) : obj;
   };
 
-  const save = () => {
+  const save = (key: string | undefined) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
       // fix setTimeout violation problem
       Promise.resolve().then(() => {
-        for (const [setStateFun, cachedProxy] of subscribers) {
+        for (const [setStateFun, [cachedProxy, subscribedKeys]] of subscribers) {
           if (proxy === cachedProxy || stateTarget === cachedProxy.____rsp_target____) {
             // trigger re-render, only for the same state target
-            setStateFun({});
+            if (Array.isArray(subscribedKeys) && subscribedKeys.length) {
+              isMatchedSubscribedKeys(key, subscribedKeys) && setStateFun({});
+            } else {
+              setStateFun({});
+            }
           }
         }
       });
@@ -107,14 +113,14 @@ export function stateWrapper<State extends Target>(stateTarget: State): State {
       const res = Reflect.set(target, key as string, wrap(value), receiver);
       // avoid unnecessary re-render
       if (prev !== value) {
-        save();
+        save(key);
       }
       return res;
     },
 
     deleteProperty(target: Target, key: string) {
       const res = Reflect.deleteProperty(target, key);
-      save();
+      save(key);
       return res;
     },
   };
@@ -125,7 +131,7 @@ export function stateWrapper<State extends Target>(stateTarget: State): State {
 }
 
 function initializeStateTarget(stateData: Target, proxy: object, save: Function) {
-  for (let key in stateData) {
+  for (const key in stateData) {
     const item = stateData[key];
     if (isObj(item) && item.asyncStateSymbol === asyncStateSymbol) {
       delete item.asyncStateSymbol;
@@ -141,7 +147,21 @@ function initializeStateTarget(stateData: Target, proxy: object, save: Function)
   }
 }
 
-export function stateProxy<State extends Target>(stateTarget: State): State {
+function isMatchedSubscribedKeys(key: string | undefined, subscribedKeys: string[]) {
+  if (key === undefined) {
+    return true; // default to ture if no key is specified
+  }
+
+  for (const k of subscribedKeys) {
+    if (key && k === key) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function stateProxy<State extends Target>(stateTarget: State, subscribedKeys: string[] = []): State {
   if (!isObj(stateTarget)) {
     throw new Error('react-state-proxy[stateProxy]: The [stateTarget] must be an object.');
   }
@@ -149,7 +169,7 @@ export function stateProxy<State extends Target>(stateTarget: State): State {
 
   // wrap the specified stateTarget & add proxy instance to the subscriber list
   if (!subscribers.has(setState)) {
-    subscribers.set(setState, stateWrapper(stateTarget));
+    subscribers.set(setState, [stateWrapper(stateTarget), subscribedKeys]);
   }
 
   useLayoutEffect(() => {
@@ -158,10 +178,15 @@ export function stateProxy<State extends Target>(stateTarget: State): State {
     };
   }, []);
 
-  return subscribers.get(setState) as State;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return subscribers.get(setState)![0] as State;
 }
 
-export function stateProxyForClassComponent<State extends Target>(component: Component, stateTarget: State) {
+export function stateProxyForClassComponent<State extends Target>(
+  component: Component,
+  stateTarget: State,
+  subscribedKeys: string[] = []
+) {
   if (!isObj(stateTarget)) {
     throw new Error('react-state-proxy[stateProxyForClassComponent]: The [stateTarget] must be an object.');
   }
@@ -169,7 +194,7 @@ export function stateProxyForClassComponent<State extends Target>(component: Com
   // bind is required here, otherwise setState will always point to the same object even if different components
   const setState = component.setState.bind(component);
   if (!subscribers.has(setState)) {
-    subscribers.set(setState, stateWrapper(stateTarget));
+    subscribers.set(setState, [stateWrapper(stateTarget), subscribedKeys]);
   }
 
   const original = component.componentWillUnmount?.bind(component);
@@ -178,7 +203,8 @@ export function stateProxyForClassComponent<State extends Target>(component: Com
     return original?.();
   };
 
-  return subscribers.get(setState) as State;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return subscribers.get(setState)![0] as State;
 }
 
 // alias
