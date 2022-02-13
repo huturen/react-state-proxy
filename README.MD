@@ -216,7 +216,7 @@ export default function AsyncComponent() {
     }, 'loading...'),
   });
 
-  // the text of the button below will be changed from 'loading...' to 'done' after 1 second.
+  // the text of the button below will be changed from 'loading...' to 'done' in 1 second.
   return <button>{state.status.value}</button>;
 }
 ```
@@ -240,7 +240,7 @@ export default function AsyncComponent() {
       this.status = 'loaded';
     },
   });
-  // the text of the button below will be changed from 'loading...' to 'loaded' after 1 second.
+  // the text of the button below will be changed from 'loading...' to 'loaded' in 1 second.
   return <button>{state.status}</button>;
 }
 ```
