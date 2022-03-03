@@ -149,7 +149,7 @@ function initializeStateTarget(stateData: Target, proxy: object, save: Function)
 
 function isMatchedSubscribedKeys(key: string | undefined, subscribedKeys: string[]) {
   if (key === undefined) {
-    return true; // default to ture if no key is specified
+    return true; // default to true if no key is specified
   }
 
   for (const k of subscribedKeys) {
