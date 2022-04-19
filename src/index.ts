@@ -56,7 +56,7 @@ export function async(initialValue: any, asyncFunction: Function, fallbackValue:
 const subscribers: Map<Function, [Target, string[]]> = new Map();
 
 const stateProxySymbol = Symbol('stateProxySymbol');
-export function stateWrapper<State extends Target>(stateTarget: State): State {
+export function stateWrapper<State extends Target>(stateTarget: State): State & { setState?: object } {
   if (!isObj(stateTarget)) {
     throw new Error('react-state-proxy[stateWrapper]: The [stateTarget] must be an object.');
   }
@@ -169,7 +169,9 @@ export function stateProxy<State extends Target>(stateTarget: State, subscribedK
 
   // wrap the specified stateTarget & add proxy instance to the subscriber list
   if (!subscribers.has(setState)) {
-    subscribers.set(setState, [stateWrapper(stateTarget), subscribedKeys]);
+    const proxy = stateWrapper(stateTarget);
+    proxy.setState = setState; // for compatibility with react18
+    subscribers.set(setState, [proxy, subscribedKeys]);
   }
 
   useLayoutEffect(() => {
